@@ -1,7 +1,5 @@
-# .github/workflows/update-meta.yml
 name: Update userscript meta
 
-# trigger whenever any .user.js (your main scripts) change
 on:
   push:
     paths:
@@ -14,14 +12,13 @@ jobs:
       # 1. checkout so we can read & write files
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 0   
+          fetch-depth: 0
 
       # 2. loop over every *.user.js except *_meta.user.js
       - name: Extract metadata for all userscripts
         run: |
           shopt -s nullglob
           for file in *.user.js; do
-            # skip any that are already *_meta.user.js
             if [[ "$file" != *_meta.user.js ]]; then
               out="${file%.user.js}_meta.user.js"
               echo "Generating $out from $file"
@@ -33,6 +30,6 @@ jobs:
       - name: Commit meta files
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit_message: chore: update userscript meta
+          commit_message: 'chore: update userscript meta'
           file_pattern: '*_meta.user.js'
           token: ${{ secrets.GITHUB_TOKEN }}
