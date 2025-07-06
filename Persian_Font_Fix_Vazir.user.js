@@ -26,8 +26,8 @@
 // @grant        GM_addStyle
 // @run-at       document-start
 // @license      MIT
-// @downloadURL https://github.com/sinazadeh/userscripts/raw/refs/heads/main/Persian_Font_Fix_Vazir.user.js
-// @updateURL https://github.com/sinazadeh/userscripts/raw/refs/heads/main/Persian_Font_Fix_Vazir.user.js
+// @downloadURL https://raw.githubusercontent.com/sinazadeh/userscripts/Persian_Font_Fix_Vazir.user.js
+// @updateURL https://raw.githubusercontent.com/sinazadeh/userscripts/Persian_Font_Fix_Vazir.user.js
 // ==/UserScript==
 /* jshint esversion: 10 */
 /* global requestIdleCallback */
