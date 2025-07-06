@@ -1,5 +1,9 @@
 name: Update userscript meta
 
+# give GITHUB_TOKEN contents: write so commits can push
+permissions:
+  contents: write
+
 on:
   push:
     paths:
@@ -9,12 +13,10 @@ jobs:
   extract_meta:
     runs-on: ubuntu-latest
     steps:
-      # 1. checkout so we can read & write files
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      # 2. loop over every *.user.js except *_meta.user.js
       - name: Extract metadata for all userscripts
         run: |
           shopt -s nullglob
@@ -26,10 +28,8 @@ jobs:
             fi
           done
 
-      # 3. commit & push back any new/changed *_meta.user.js
       - name: Commit meta files
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: 'chore: update userscript meta'
           file_pattern: '*_meta.user.js'
-          token: ${{ secrets.GITHUB_TOKEN }}
