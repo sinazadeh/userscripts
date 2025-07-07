@@ -1,9 +1,9 @@
 {
     "arrowParens": "avoid",
     "bracketSpacing": false,
+    "bracketSameLine": false,
     "endOfLine": "lf",
     "htmlWhitespaceSensitivity": "css",
-    "jsxBracketSameLine": false,
     "printWidth": 80,
     "proseWrap": "preserve",
     "requirePragma": false,
@@ -13,6 +13,8 @@
     "trailingComma": "all",
     "useTabs": false,
     "vueIndentScriptAndStyle": true,
+    "plugins": ["prettier-plugin-organize-imports"],
+    "embeddedLanguageFormatting": "auto",
     "overrides": [
         {
             "files": "*.json",
