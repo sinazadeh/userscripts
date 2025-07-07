@@ -2,34 +2,41 @@ name: Update userscript meta
 
 # give GITHUB_TOKEN contents: write so commits can push
 permissions:
-  contents: write
+    contents: write
 
 on:
-  push:
-    paths:
-      - '*.user.js'
+    push:
+        paths:
+            - '*.user.js'
 
 jobs:
-  extract_meta:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
+    extract_meta:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v3
+              with:
+                  fetch-depth: 0
+                  persist-credentials: true # so we can push
 
-      - name: Extract metadata for all userscripts
-        run: |
-          shopt -s nullglob
-          for file in *.user.js; do
-            if [[ "$file" != *_meta.user.js ]]; then
-              out="${file%.user.js}_meta.user.js"
-              echo "Generating $out from $file"
-              sed -n '/^\/\/ ==UserScript==$/,/^\/\/ ==\/UserScript==$/p' "$file" > "$out"
-            fi
-          done
+            - name: Extract metadata for all userscripts
+              run: |
+                  shopt -s nullglob
+                  for file in *.user.js; do
+                    if [[ "$file" != *_meta.user.js ]]; then
+                      out="${file%.user.js}_meta.user.js"
+                      echo "Generating $out from $file"
+                      sed -n '/^\/\/ ==UserScript==$/,/^\/\/ ==\/UserScript==$/p' "$file" > "$out"
+                    fi
+                  done
 
-      - name: Commit meta files
-        uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: 'chore: update userscript meta'
-          file_pattern: '*_meta.user.js'
+            - name: Amend generated meta into last commit
+              uses: stefanzweifel/git-auto-commit-action@v4
+              with:
+                  commit_message: 'chore: update userscript meta'
+                  file_pattern: '*_meta.user.js'
+                  commit_mode: 'amend' # <-- amend previous commit instead of creating a new one
+                  commit_user_name: 'github-actions'
+                  commit_user_email: 'actions@github.com'
+                  push: true
+                  push_force: true # <-- force-push the amended commit
