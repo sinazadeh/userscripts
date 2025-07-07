@@ -18,18 +18,23 @@ const path = require('path');
     console.log('▶ at sign-in page, URL=', page.url());
     await page.screenshot({path: 'debug-signin.png'});
 
-    // 2) Wait for the email input to appear
+    // 2) Wait for the correct email input selector
     await page
-        .waitForSelector('#user_email', {timeout: 30000})
+        .waitForSelector('input[name="user[email]"]', {timeout: 30000})
         .catch(() =>
-            console.warn('⚠️ #user_email not found; see debug-signin.png'),
+            console.warn(
+                '⚠️ input[name="user[email]"] not found; see debug-signin.png',
+            ),
         );
 
     // 3) Fill credentials and submit
-    await page.fill('#user_email', process.env.GREASYFORK_EMAIL);
-    await page.fill('#user_password', process.env.GREASYFORK_PASSWORD);
+    await page.fill('input[name="user[email]"]', process.env.GREASYFORK_EMAIL);
+    await page.fill(
+        'input[name="user[password]"]',
+        process.env.GREASYFORK_PASSWORD,
+    );
     await Promise.all([
-        page.click('input[name="commit"]'),
+        page.click('input[type="submit"][name="commit"]'),
         page.waitForNavigation({timeout: 60000}),
     ]);
     console.log('▶ after login, URL=', page.url());
@@ -66,7 +71,7 @@ const path = require('path');
         path.resolve(__dirname, 'Persian_Font_Fix_Vazir.user.js'),
     );
     await Promise.all([
-        page.click('input[name="commit"]'),
+        page.click('input[type="submit"][name="commit"]'),
         page.waitForNavigation({timeout: 60000}),
     ]);
     console.log('✅ upload finished, URL=', page.url());
