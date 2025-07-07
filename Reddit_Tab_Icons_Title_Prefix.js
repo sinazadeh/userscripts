@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Reddit Tab Icons & Title Prefix
 // @namespace https://github.com/sinazadeh/userscripts
-// @version      1.3.1
+// @version      1.3.2
 // @description  Efficiently fetch & cache subreddit favicons and always prefix the tab title with r/Name on reddit.
 // @author       TheSina
 // @match        https://*.reddit.com/*
