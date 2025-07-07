@@ -29,7 +29,7 @@
 // @downloadURL  https://raw.githubusercontent.com/sinazadeh/userscripts/refs/heads/main/Persian_Font_Fix_Vazir.user.js
 // @updateURL    https://raw.githubusercontent.com/sinazadeh/userscripts/refs/heads/main/Persian_Font_Fix_Vazir_meta.user.js
 // ==/UserScript==
-/* jshint esversion: 10 */
+/* jshint esversion: 6 */
 /* global requestIdleCallback */
 (function () {
     "use strict";
@@ -109,7 +109,8 @@
             if (start != null && end != null) {
                 try {
                     el.setSelectionRange(start, end);
-                } catch (err) {
+                }
+                catch (err) {
                     // Ignore
                 }
             }
@@ -164,7 +165,8 @@
                     if (n.nodeType === 3) {
                         // text node
                         if (replacementRegex.test(n.nodeValue)) pending.add(n);
-                    } else if (n.nodeType === 1) {
+                    }
+                    else if (n.nodeType === 1) {
                         // element
                         // if it has replaceable text somewhere in subtree
                         if (replacementRegex.test(n.textContent)) pending.add(n);
@@ -194,7 +196,8 @@
                 timeout: 500,
             }
             );
-        } else {
+        }
+        else {
             setTimeout(() => fixNode(document.body), 200);
             setTimeout(() => {
                 document.querySelectorAll("input,textarea").forEach(attachInput);
@@ -211,7 +214,8 @@
 
     if (document.readyState === "complete") {
         init();
-    } else {
+    }
+    else {
         window.addEventListener("load", init);
     }
 })();
