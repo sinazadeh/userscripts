@@ -21,7 +21,11 @@ if (!scriptId || !filePath) {
     process.exit(1);
 }
 
-// URLs
+// Greasy Fork requires a non-empty changelog
+const changesText =
+    changes && changes.trim() ? changes : 'Automated upload via CI';
+
+// Endpoints
 const FORM_URL = `https://greasyfork.org/en/scripts/${scriptId}/versions/new/`;
 const POST_URL = `https://greasyfork.org/en/scripts/${scriptId}/versions`;
 
@@ -37,7 +41,6 @@ async function fetchAuthenticityToken() {
     const res = await axios.get(FORM_URL, {
         headers: {
             ...cookieHeader,
-            // mimic a normal browser
             'User-Agent': 'Mozilla/5.0',
             Accept: 'text/html',
         },
@@ -53,15 +56,12 @@ async function main() {
 
     form.append('authenticity_token', token);
     form.append('version[script]', scriptId);
-    if (changes) {
-        form.append('version[changes]', changes);
-    }
+    form.append('version[changes]', changesText);
     form.append('version[file]', fs.createReadStream(path.resolve(filePath)));
     // Greasy Fork defaults
     form.append('additional_info', 'true');
     form.append('adult_content', '0');
 
-    // merge FormData headers (including boundary) with our cookie
     const headers = {
         ...form.getHeaders(),
         ...cookieHeader,
@@ -92,11 +92,11 @@ async function main() {
 
         if (error.response?.data) {
             fs.writeFileSync(
-                'debug_corrected_404.html',
+                'debug_corrected_422.html',
                 error.response.data,
                 'utf8',
             );
-            console.error('📝 Wrote debug_corrected_404.html');
+            console.error('📝 Wrote debug_corrected_422.html');
         }
         process.exit(1);
     }
