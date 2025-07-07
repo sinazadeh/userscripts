@@ -40,17 +40,17 @@ const path = require('path');
     console.log('▶ after login, URL=', page.url());
     await page.screenshot({path: 'debug-after-login.png'});
 
-    // 4) Navigate to script page to confirm ownership
-    const scriptId = '538095'; // numeric ID only
-    await page.goto(`https://greasyfork.org/en/scripts/${scriptId}`, {
+    // 4) Navigate to script page to confirm ownership using slug
+    const scriptSlug = '538095-persian-font-fix-vazir';
+    await page.goto(`https://greasyfork.org/en/scripts/${scriptSlug}`, {
         waitUntil: 'networkidle',
     });
     console.log('▶ at script page, URL=', page.url());
     await page.screenshot({path: 'debug-script-page.png'});
 
-    // 5) Go to the "new version" form
+    // 5) Go to the "new version" form using full slug
     await page.goto(
-        `https://greasyfork.org/en/scripts/${scriptId}/versions/new`,
+        `https://greasyfork.org/en/scripts/${scriptSlug}/versions/new`,
         {waitUntil: 'networkidle'},
     );
     console.log('▶ at versions/new, URL=', page.url());
