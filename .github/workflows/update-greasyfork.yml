@@ -4,7 +4,7 @@ on:
     push:
         paths:
             - 'Persian_Font_Fix_Vazir.user.js'
-            - 'greasyfork-update.js'
+            - 'greasyfork-upload.js'
 
 jobs:
     update:
@@ -17,15 +17,16 @@ jobs:
             - name: Setup Node.js
               uses: actions/setup-node@v4
               with:
-                  node-version: 18
+                  node-version: '18'
 
             - name: Install dependencies
               run: |
-                  npm install -D playwright dotenv
-                  npx playwright install --with-deps
+                  # initialize npm (if you don't already have a package.json)
+                  npm init -y
+                  # install only the HTTP‐upload libraries
+                  npm install axios form-data tough-cookie cheerio axios-cookiejar-support
 
-            - name: Run GreasyFork updater
+            - name: Run GreasyFork uploader
               env:
-                  GREASYFORK_EMAIL: ${{ secrets.GREASYFORK_EMAIL }}
-                  GREASYFORK_PASSWORD: ${{ secrets.GREASYFORK_PASSWORD }}
-              run: node greasyfork-update.js
+                  GREASYFORK_SESSION: ${{ secrets.GREASYFORK_SESSION }}
+              run: node greasyfork-upload.js
