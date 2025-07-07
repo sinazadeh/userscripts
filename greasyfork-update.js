@@ -3,33 +3,29 @@ require('dotenv').config();
 const path = require('path');
 
 (async () => {
-    const browser = await chromium.launch({
-        headless: false, // run headful so you can watch it
-        slowMo: 100, // slow things down a bit
-    });
+    // Launch in headless mode so no X server is required
+    const browser = await chromium.launch({headless: true});
     const context = await browser.newContext();
     const page = await context.newPage();
 
-    // log any in-page console messages
+    // Log in-page console messages
     page.on('console', msg => console.log('PAGE LOG ▶', msg.text()));
 
     // 1) Go to sign-in page
     await page.goto('https://greasyfork.org/en/users/sign_in', {
         waitUntil: 'networkidle',
     });
-    console.log('▶ at sign‐in page, URL=', page.url());
+    console.log('▶ at sign-in page, URL=', page.url());
     await page.screenshot({path: 'debug-signin.png'});
 
-    // 2) Wait for the email input to appear (may be injected by JS)
+    // 2) Wait for the email input to appear
     await page
         .waitForSelector('#user_email', {timeout: 30000})
         .catch(() =>
-            console.warn(
-                '⚠️ #user_email not found; page HTML snapshot in debug-signin.png',
-            ),
+            console.warn('⚠️ #user_email not found; see debug-signin.png'),
         );
 
-    // 3) Fill and submit
+    // 3) Fill credentials and submit
     await page.fill('#user_email', process.env.GREASYFORK_EMAIL);
     await page.fill('#user_password', process.env.GREASYFORK_PASSWORD);
     await Promise.all([
@@ -39,7 +35,7 @@ const path = require('path');
     console.log('▶ after login, URL=', page.url());
     await page.screenshot({path: 'debug-after-login.png'});
 
-    // 4) Double-check you’re actually recognized as the script owner:
+    // 4) Navigate to script page to confirm ownership
     const scriptId = '538095'; // numeric ID only
     await page.goto(`https://greasyfork.org/en/scripts/${scriptId}`, {
         waitUntil: 'networkidle',
@@ -47,7 +43,7 @@ const path = require('path');
     console.log('▶ at script page, URL=', page.url());
     await page.screenshot({path: 'debug-script-page.png'});
 
-    // 5) Now go to the new-version form
+    // 5) Go to the "new version" form
     await page.goto(
         `https://greasyfork.org/en/scripts/${scriptId}/versions/new`,
         {waitUntil: 'networkidle'},
@@ -55,7 +51,7 @@ const path = require('path');
     console.log('▶ at versions/new, URL=', page.url());
     await page.screenshot({path: 'debug-versions-new.png'});
 
-    // 6) Wait for any file input
+    // 6) Wait for the file input to appear
     await page
         .waitForSelector('input[type="file"]', {timeout: 30000})
         .catch(err => {
@@ -64,7 +60,7 @@ const path = require('path');
         });
     console.log('▶ file input is present');
 
-    // 7) Upload and submit
+    // 7) Upload your updated userscript and submit
     await page.setInputFiles(
         'input[type="file"]',
         path.resolve(__dirname, 'Persian_Font_Fix_Vazir.user.js'),
