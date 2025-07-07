@@ -15,21 +15,17 @@ for (let i = 0; i < raw.length; i++) {
     }
 }
 
-const {script: scriptId, file: filePath, changes} = args;
+const {script: scriptId, file: filePath} = args;
 if (!scriptId || !filePath) {
-    console.error('Usage: --script <id> --file <path> [--changes "<text>"]');
+    console.error('Usage: --script <id> --file <path>');
     process.exit(1);
 }
 
-// Greasy Fork requires a non-empty changelog
-const changesText =
-    changes && changes.trim() ? changes : 'Automated upload via CI';
-
 // Endpoints
-const FORM_URL = `https://greasyfork.org/en/scripts/${scriptId}/versions/new/`;
+const FORM_URL = `https://greasyfork.org/en/scripts/${scriptId}-*/versions/new`;
 const POST_URL = `https://greasyfork.org/en/scripts/${scriptId}/versions`;
 
-// Grab your session cookie from env
+// Session cookie
 const session = process.env.GREASYFORK_SESSION;
 if (!session) {
     console.error('❌ Missing GREASYFORK_SESSION env variable');
@@ -43,8 +39,8 @@ async function fetchAuthenticityToken() {
             ...cookieHeader,
             'User-Agent': 'Mozilla/5.0',
             Accept: 'text/html',
-            Referer: `https://greasyfork.org/`,
-            Origin: `https://greasyfork.org`,
+            Referer: 'https://greasyfork.org/',
+            Origin: 'https://greasyfork.org',
         },
     });
     const m = res.data.match(/name="authenticity_token" value="([^"]+)"/);
@@ -56,14 +52,11 @@ async function main() {
     const token = await fetchAuthenticityToken();
     const form = new FormData();
 
+    // Bare minimum fields
     form.append('authenticity_token', token);
     form.append('version[script]', scriptId);
-    form.append('version[changes]', changesText);
-    form.append('version[file]', fs.createReadStream(path.resolve(filePath)));
-    form.append('additional_info', 'true');
-    form.append('adult_content', '0');
-    // **THIS** is required
-    form.append('commit', 'Upload Version');
+    form.append('code_upload', fs.createReadStream(path.resolve(filePath)));
+    form.append('commit', 'Post new version');
 
     const headers = {
         ...form.getHeaders(),
@@ -84,9 +77,7 @@ async function main() {
             process.exit(1);
         }
     } catch (error) {
-        if (error.config?.headers) {
-            delete error.config.headers['Cookie'];
-        }
+        if (error.config?.headers) delete error.config.headers['Cookie'];
         console.error('❌ Upload failed:', {
             url: error.config?.url,
             method: error.config?.method,
@@ -95,12 +86,8 @@ async function main() {
         });
 
         if (error.response?.data) {
-            fs.writeFileSync(
-                'debug_corrected_422.html',
-                error.response.data,
-                'utf8',
-            );
-            console.error('📝 Wrote debug_corrected_422.html');
+            fs.writeFileSync('debug_upload.html', error.response.data, 'utf8');
+            console.error('📝 Wrote debug_upload.html');
         }
         process.exit(1);
     }
