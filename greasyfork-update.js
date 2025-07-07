@@ -62,6 +62,8 @@ async function main() {
     form.append('version[file]', fs.createReadStream(path.resolve(filePath)));
     form.append('additional_info', 'true');
     form.append('adult_content', '0');
+    // **THIS** is required
+    form.append('commit', 'Upload Version');
 
     const headers = {
         ...form.getHeaders(),
