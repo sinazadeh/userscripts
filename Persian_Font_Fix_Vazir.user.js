@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Persian Font Fix (Vazir)
 // @namespace    https://github.com/sinazadeh/userscripts
-// @version      2.0.17
+// @version      2.0.19
 // @description  Improves the readability of Persian and RTL content by applying the Vazir font across supported websites.
 // @author       TheSina
 // @match       *://*.telegram.org/*
@@ -36,19 +36,50 @@
 
     // --- 0. Inject font regardless of performance tweaks ---
     GM_addStyle(`
-    @font-face {
-        font-family: 'VazirmatnFixed';
-        src: local('Vazirmatn');
-        font-display: swap;
-        unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF;
-    }
-    body, p, div, h1, h2, h3, h4, h5, h6,
-    a, li, td, th, input[type="text"], input[type="search"],
-    textarea, select, option, label, button,
-    blockquote, summary, details, figcaption, strong, em,
-    span[lang^="fa"], span[lang^="ar"], span[dir="rtl"] {
-        font-family: 'VazirmatnFixed','Noto Sans','Apple Color Emoji','Noto Color Emoji','Twemoji Mozilla','Google Sans','Helvetica Neue',sans-serif !important;
-    }`);
+        @font-face {
+            font-family: 'VazirmatnFixed';
+            src: local('Vazirmatn');
+            font-display: swap;
+            unicode-range:
+                U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF;
+        }
+        body,
+        p,
+        div,
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        a,
+        li,
+        td,
+        th,
+        input[type='text'],
+        input[type='search'],
+        textarea,
+        select,
+        option,
+        label,
+        button,
+        blockquote,
+        summary,
+        details,
+        figcaption,
+        strong,
+        em,
+        span[lang^='fa'],
+        span[lang^='ar'],
+        span[dir='rtl'] {
+            font-family:
+                'VazirmatnFixed', 'Noto Sans', 'Apple Color Emoji', 'Noto Color Emoji',
+                'Twemoji Mozilla', 'Google Sans', 'Helvetica Neue', sans-serif !important;
+        }
+        html {
+            font-size: 16px;
+        }
+        `);
 
     // --- 1. Only look for the two characters we actually replace ---
     const replacementRegex = /[يك]/g;
