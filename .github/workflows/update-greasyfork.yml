@@ -4,7 +4,7 @@ on:
     push:
         paths:
             - 'Persian_Font_Fix_Vazir.user.js'
-            - 'greasyfork-upload.js'
+            - 'greasyfork-update.js'
 
 jobs:
     update:
