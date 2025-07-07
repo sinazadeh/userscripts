@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Persian Font Fix (Vazir)
 // @namespace    https://github.com/sinazadeh/userscripts
-// @version      2.0.25
+// @version      2.0.26
 // @description  Improves the readability of Persian and RTL content by applying the Vazir font across supported websites.
 // @author       TheSina
 // @match       *://*.telegram.org/*
