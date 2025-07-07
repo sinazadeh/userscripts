@@ -2,6 +2,7 @@
 const axios = require('axios');
 const FormData = require('form-data');
 const fs = require('fs');
+const path = require('path');
 const tough = require('tough-cookie');
 const cheerio = require('cheerio');
 const {default: axiosCookieJarSupport} = require('axios-cookiejar-support');

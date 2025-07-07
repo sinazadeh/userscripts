@@ -29,4 +29,4 @@ jobs:
             - name: Run GreasyFork uploader
               env:
                   GREASYFORK_SESSION: ${{ secrets.GREASYFORK_SESSION }}
-              run: node greasyfork-upload.js
+              run: node greasyfork-update.js
