@@ -1,1 +1,31 @@
+name: Update GreasyFork Script
 
+on:
+    push:
+        paths:
+            - 'Persian_Font_Fix_Vazir.user.js'
+            - 'greasyfork-update.js'
+
+jobs:
+    update:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 18
+
+            - name: Install dependencies
+              run: |
+                  npm install -D playwright dotenv
+                  npx playwright install --with-deps
+
+            - name: Run GreasyFork updater
+              env:
+                  GREASYFORK_EMAIL: ${{ secrets.GREASYFORK_EMAIL }}
+                  GREASYFORK_PASSWORD: ${{ secrets.GREASYFORK_PASSWORD }}
+              run: node greasyfork-update.js
