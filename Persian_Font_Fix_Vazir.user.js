@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Persian Font Fix (Vazir)
 // @namespace    https://github.com/sinazadeh/userscripts
-// @version      2.0.12
+// @version      2.0.13
 // @description  Apply Vazir font to Persian/RTL content across selected websites
 // @author       TheSina
 // @match       *://*.telegram.org/*
@@ -26,8 +26,8 @@
 // @grant        GM_addStyle
 // @run-at       document-start
 // @license      MIT
-// @downloadURL https://raw.githubusercontent.com/sinazadeh/userscripts/main/Persian_Font_Fix_Vazir.user.js
-// @updateURL https://raw.githubusercontent.com/sinazadeh/userscripts/main/Persian_Font_Fix_Vazir_meta.user.js
+// @downloadURL https://raw.githubusercontent.com/sinazadeh/userscripts/refs/heads/main/Persian_Font_Fix_Vazir.user.js
+// @updateURL https://raw.githubusercontent.com/sinazadeh/userscripts/refs/heads/main/Persian_Font_Fix_Vazir_meta.user.js
 // ==/UserScript==
 /* jshint esversion: 10 */
 /* global requestIdleCallback */
