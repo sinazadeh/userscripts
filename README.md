@@ -4,20 +4,20 @@ A curated collection of userscripts designed to enhance your browsing experience
 
 ---
 
-## 🔤 Persian Font Fix (Vazir)
+## 🛡️ Reddit Tab Icons & Title Prefix
 
-Improves the readability of Persian and RTL content by applying the **Vazir** font across supported websites.
-
-### **🛠 Prerequisites**
-
-To ensure proper rendering, install the following fonts on your system:
-
-- [Vazirmatn](https://fonts.google.com/specimen/Vazirmatn)
-- [Noto Sans](https://fonts.google.com/noto/specimen/Noto+Sans)
+Adds subreddit icons to Reddit tabs and prefixes the tab title with `r/SubredditName` for easier tab identification and navigation.
 
 ### **📥 Install**
 
-To install the script, click [here](https://raw.githubusercontent.com/sinazadeh/userscripts/refs/heads/main/Persian_Font_Fix_Vazir.user.js).
+To install the script, click [here](https://raw.githubusercontent.com/sinazadeh/userscripts/refs/heads/main/Reddit_Tab_Icons_Title_Prefix.user.js).
+
+### **✨ Features**
+
+- Adds subreddit-specific icons to Reddit tabs for better visibility.
+- Prefixes the tab title with `r/SubredditName` for quick identification.
+- Handles Reddit’s single-page navigation and updates icons/titles dynamically.
+- Efficient caching and minimal network requests.
 
 ---
 
@@ -51,3 +51,20 @@ Noto Color Emoji, Segoe UI Emoji, Twemoji Mozilla
 ### **❓ What’s new in Unicode 16?**
 
 Check out [Emojipedia’s Unicode 16.0 overview](https://emojipedia.org/unicode-16.0) for the latest emoji additions.
+
+---
+
+## 🔤 Persian Font Fix (Vazir)
+
+Improves the readability of Persian and RTL content by applying the **Vazir** font across supported websites.
+
+### **🛠 Prerequisites**
+
+To ensure proper rendering, install the following fonts on your system:
+
+- [Vazirmatn](https://fonts.google.com/specimen/Vazirmatn)
+- [Noto Sans](https://fonts.google.com/noto/specimen/Noto+Sans)
+
+### **📥 Install**
+
+To install the script, click [here](https://raw.githubusercontent.com/sinazadeh/userscripts/refs/heads/main/Persian_Font_Fix_Vazir.user.js).

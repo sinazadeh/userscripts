@@ -1,6 +1,5 @@
 name: Update userscript meta
 
-# give GITHUB_TOKEN contents: write so commits can push
 permissions:
     contents: write
 
@@ -17,7 +16,7 @@ jobs:
               uses: actions/checkout@v3
               with:
                   fetch-depth: 0
-                  persist-credentials: true # so we can push
+                  persist-credentials: true
 
             - name: Extract metadata for all userscripts
               run: |
@@ -35,8 +34,9 @@ jobs:
               with:
                   commit_message: 'chore: update userscript meta'
                   file_pattern: '*_meta.user.js'
-                  commit_mode: 'amend' # <-- amend previous commit instead of creating a new one
+                  # amend instead of creating a new commit
+                  commit_options: '--amend --no-edit'
+                  # force the amended commit back up
+                  push_options: '--force-with-lease'
                   commit_user_name: 'github-actions'
                   commit_user_email: 'actions@github.com'
-                  push: true
-                  push_force: true # <-- force-push the amended commit
