@@ -43,6 +43,8 @@ async function fetchAuthenticityToken() {
             ...cookieHeader,
             'User-Agent': 'Mozilla/5.0',
             Accept: 'text/html',
+            Referer: `https://greasyfork.org/`,
+            Origin: `https://greasyfork.org`,
         },
     });
     const m = res.data.match(/name="authenticity_token" value="([^"]+)"/);
@@ -58,7 +60,6 @@ async function main() {
     form.append('version[script]', scriptId);
     form.append('version[changes]', changesText);
     form.append('version[file]', fs.createReadStream(path.resolve(filePath)));
-    // Greasy Fork defaults
     form.append('additional_info', 'true');
     form.append('adult_content', '0');
 
@@ -67,6 +68,8 @@ async function main() {
         ...cookieHeader,
         'User-Agent': 'Mozilla/5.0',
         Accept: 'text/html',
+        Referer: FORM_URL,
+        Origin: 'https://greasyfork.org',
     };
 
     try {
@@ -79,7 +82,6 @@ async function main() {
             process.exit(1);
         }
     } catch (error) {
-        // strip cookies before logging
         if (error.config?.headers) {
             delete error.config.headers['Cookie'];
         }
