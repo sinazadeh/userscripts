@@ -42,7 +42,7 @@ To install the script, click [here](https://raw.githubusercontent.com/sinazadeh/
 
 **🦊 Firefox Tip**
 
-To extend emoji support across all websites in Firefox, set the `font.name-list.emoji` value in `about:config` to:
+To extend emoji support across all websites in Firefox (and its forks), set the `font.name-list.emoji` value in `about:config` to:
 
 ```
 Noto Color Emoji, Segoe UI Emoji, Twemoji Mozilla
