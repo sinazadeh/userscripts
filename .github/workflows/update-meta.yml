@@ -13,9 +13,11 @@ jobs:
     extract_meta:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v3
+            - name: Checkout repository
+              uses: actions/checkout@v3
               with:
                   fetch-depth: 0
+                  persist-credentials: true # so we can push
 
             - name: Extract metadata for all userscripts
               run: |
@@ -28,8 +30,13 @@ jobs:
                     fi
                   done
 
-            - name: Commit meta files
+            - name: Amend generated meta into last commit
               uses: stefanzweifel/git-auto-commit-action@v4
               with:
                   commit_message: 'chore: update userscript meta'
                   file_pattern: '*_meta.user.js'
+                  commit_mode: 'amend' # <-- amend previous commit instead of creating a new one
+                  commit_user_name: 'github-actions'
+                  commit_user_email: 'actions@github.com'
+                  push: true
+                  push_force: true # <-- force-push the amended commit
