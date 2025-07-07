@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Persian Font Fix (Vazir)
 // @namespace    https://github.com/sinazadeh/userscripts
-// @version      2.0.15
+// @version      2.0.16
 // @description  Apply Vazir font to Persian/RTL content across selected websites
 // @author       TheSina
 // @match       *://*.telegram.org/*
@@ -32,7 +32,7 @@
 /* jshint esversion: 6 */
 /* global requestIdleCallback */
 (function () {
-    "use strict";
+    'use strict';
 
     // --- 0. Inject font regardless of performance tweaks ---
     GM_addStyle(`
@@ -53,31 +53,32 @@
     // --- 1. Only look for the two characters we actually replace ---
     const replacementRegex = /[يك]/g;
     const charMap = new Map([
-        ["ي", "ی"],
-        ["ك", "ک"],
+        ['ي', 'ی'],
+        ['ك', 'ک'],
     ]);
 
-    const fixText = (text) =>
-        text.replace(replacementRegex, (c) => charMap.get(c) || c);
+    const fixText = text =>
+        text.replace(replacementRegex, c => charMap.get(c) || c);
 
     // --- 2. Fast node‐by‐node replacement, only when needed ---
     const processed = new WeakSet();
     const walkerFilter = {
         acceptNode(node) {
             // only walk TEXT nodes that contain at least one replaceable char
-            return replacementRegex.test(node.nodeValue) ?
-                NodeFilter.FILTER_ACCEPT :
-                NodeFilter.FILTER_SKIP;
+            return replacementRegex.test(node.nodeValue)
+                ? NodeFilter.FILTER_ACCEPT
+                : NodeFilter.FILTER_SKIP;
         },
     };
 
     function fixNode(root) {
-        if (processed.has(root) || !replacementRegex.test(root.textContent)) return;
+        if (processed.has(root) || !replacementRegex.test(root.textContent))
+            return;
         const walker = document.createTreeWalker(
             root,
             NodeFilter.SHOW_TEXT,
             walkerFilter,
-            false
+            false,
         );
         let node,
             changed = false;
@@ -95,7 +96,7 @@
     // --- 3. Input elements: per-element debounce, no full re-scans ---
     function attachInput(el) {
         if (el.dataset.pfixAttached) return;
-        el.dataset.pfixAttached = "1";
+        el.dataset.pfixAttached = '1';
 
         const doFix = () => {
             if (!replacementRegex.test(el.value)) return;
@@ -109,15 +110,14 @@
             if (start != null && end != null) {
                 try {
                     el.setSelectionRange(start, end);
-                }
-                catch (err) {
+                } catch (err) {
                     // Ignore
                 }
             }
         };
 
         let to;
-        el.addEventListener("input", () => {
+        el.addEventListener('input', () => {
             clearTimeout(to);
             to = setTimeout(doFix, 50);
         });
@@ -135,7 +135,7 @@
         ticking = true;
         // run on idle if available
         const exec = () => {
-            pending.forEach((node) => {
+            pending.forEach(node => {
                 if (
                     node.nodeType === Node.TEXT_NODE ||
                     node.nodeType === Node.ELEMENT_NODE
@@ -145,36 +145,39 @@
             pending.clear();
             ticking = false;
         };
-        if ("requestIdleCallback" in window)
+        if ('requestIdleCallback' in window)
             requestIdleCallback(exec, {
                 timeout: 200,
             });
         else setTimeout(exec, 100);
     }
 
-    const obs = new MutationObserver((muts) => {
-        muts.forEach((m) => {
+    const obs = new MutationObserver(muts => {
+        muts.forEach(m => {
             if (
-                m.type === "characterData" &&
+                m.type === 'characterData' &&
                 replacementRegex.test(m.target.nodeValue)
             ) {
                 pending.add(m.target);
             }
-            if (m.type === "childList") {
-                m.addedNodes.forEach((n) => {
+            if (m.type === 'childList') {
+                m.addedNodes.forEach(n => {
                     if (n.nodeType === 3) {
                         // text node
                         if (replacementRegex.test(n.nodeValue)) pending.add(n);
-                    }
-                    else if (n.nodeType === 1) {
+                    } else if (n.nodeType === 1) {
                         // element
                         // if it has replaceable text somewhere in subtree
-                        if (replacementRegex.test(n.textContent)) pending.add(n);
+                        if (replacementRegex.test(n.textContent))
+                            pending.add(n);
                         // if it’s an <input> or <textarea>, attach
                         const tag = n.tagName;
-                        if (tag === "INPUT" || tag === "TEXTAREA") attachInput(n);
+                        if (tag === 'INPUT' || tag === 'TEXTAREA')
+                            attachInput(n);
                         // also look for any nested inputs
-                        n.querySelectorAll("input,textarea").forEach(attachInput);
+                        n.querySelectorAll('input,textarea').forEach(
+                            attachInput,
+                        );
                     }
                 });
             }
@@ -185,22 +188,26 @@
     // --- 5. Initialization only after full load, so paint isn’t blocked ---
     function init() {
         // 5a. Initial sweep in idle time
-        if ("requestIdleCallback" in window) {
+        if ('requestIdleCallback' in window) {
             requestIdleCallback(() => fixNode(document.body), {
                 timeout: 500,
             });
             requestIdleCallback(
                 () => {
-                    document.querySelectorAll("input,textarea").forEach(attachInput);
-                }, {
-                timeout: 500,
-            }
+                    document
+                        .querySelectorAll('input,textarea')
+                        .forEach(attachInput);
+                },
+                {
+                    timeout: 500,
+                },
             );
-        }
-        else {
+        } else {
             setTimeout(() => fixNode(document.body), 200);
             setTimeout(() => {
-                document.querySelectorAll("input,textarea").forEach(attachInput);
+                document
+                    .querySelectorAll('input,textarea')
+                    .forEach(attachInput);
             }, 200);
         }
 
@@ -212,10 +219,9 @@
         });
     }
 
-    if (document.readyState === "complete") {
+    if (document.readyState === 'complete') {
         init();
-    }
-    else {
-        window.addEventListener("load", init);
+    } else {
+        window.addEventListener('load', init);
     }
 })();

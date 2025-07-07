@@ -1,38 +1,38 @@
 {
-  "name": "prettier-setup",
-  "license": "MIT",
-  "devDependencies": {
-    "eslint": "7.32.0",
-    "eslint-config-prettier": "8.3.0",
-    "eslint-plugin-prettier": "3.4.0",
-    "husky": "9.1.7",
-    "lint-staged": "16.1.2",
-    "prettier": "2.3.2"
-  },
-  "lint-staged": {
-    "*.{js,jsx}": [
-      "eslint --fix"
-    ],
-    "*.{json,md,scss,yaml,yml}": [
-      "prettier --write"
-    ]
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
-  "scripts": {
-    "fix:other": "yarn prettier --write",
-    "fix:code": "yarn test:code --fix",
-    "fix": "yarn fix:code && yarn fix:other",
-    "prettier": "prettier \"**/*.{json,md,scss,yaml,yml}\"",
-    "test:other": "yarn prettier --list-different",
-    "test:code": "eslint --ignore-path .gitignore --ignore-path .prettierignore --ext .js,.jsx .",
-    "test": "yarn test:other && yarn test:code"
-  },
-  "repository": "https://github.com/lipis/prettier-setup",
-  "version": "1.0.0",
-  "main": "index.js",
-  "author": "Sina Zadeh <s.hossinzade@gmail.com>"
+    "name": "prettier-setup",
+    "license": "MIT",
+    "devDependencies": {
+        "eslint": "7.32.0",
+        "eslint-config-prettier": "8.3.0",
+        "eslint-plugin-prettier": "3.4.0",
+        "husky": "9.1.7",
+        "lint-staged": "16.1.2",
+        "prettier": "2.3.2"
+    },
+    "lint-staged": {
+        "*.{js,jsx}": [
+            "eslint --fix"
+        ],
+        "*.{json,md,scss,yaml,yml}": [
+            "prettier --write"
+        ]
+    },
+    "husky": {
+        "hooks": {
+            "pre-commit": "lint-staged"
+        }
+    },
+    "scripts": {
+        "fix:other": "yarn prettier --write",
+        "fix:code": "yarn test:code --fix",
+        "fix": "yarn fix:code && yarn fix:other",
+        "prettier": "prettier \"**/*.{json,md,scss,yaml,yml}\"",
+        "test:other": "yarn prettier --list-different",
+        "test:code": "eslint --ignore-path .gitignore --ignore-path .prettierignore --ext .js,.jsx .",
+        "test": "yarn test:other && yarn test:code"
+    },
+    "repository": "https://github.com/lipis/prettier-setup",
+    "version": "1.0.0",
+    "main": "index.js",
+    "author": "Sina Zadeh <s.hossinzade@gmail.com>"
 }
