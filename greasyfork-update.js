@@ -1,3 +1,4 @@
+// greasyfork-update.js
 const {chromium} = require('playwright');
 require('dotenv').config();
 const path = require('path');
@@ -9,16 +10,19 @@ const path = require('path');
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) ' +
         'AppleWebKit/537.36 (KHTML, like Gecko) ' +
         'Chrome/117.0.0.0 Safari/537.36';
+
+    // Create a new context with custom userAgent and viewport
     const context = await browser.newContext({
         userAgent,
         viewport: {width: 1280, height: 800},
     });
-    const page = await context.newPage();
 
-    // Prevent WebDriver flag
-    await page.evaluateOnNewDocument(() => {
+    // Prevent WebDriver flag detection
+    await context.addInitScript(() => {
         Object.defineProperty(navigator, 'webdriver', {get: () => false});
     });
+
+    const page = await context.newPage();
 
     // Log console messages from the page
     page.on('console', msg => console.log('PAGE LOG ▶', msg.text()));
