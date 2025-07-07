@@ -1,0 +1,28 @@
+{
+    "arrowParens": "avoid",
+    "bracketSpacing": false,
+    "bracketSameLine": false,
+    "endOfLine": "lf",
+    "htmlWhitespaceSensitivity": "css",
+    "printWidth": 80,
+    "proseWrap": "preserve",
+    "requirePragma": false,
+    "semi": true,
+    "singleQuote": true,
+    "tabWidth": 4,
+    "trailingComma": "all",
+    "useTabs": false,
+    "vueIndentScriptAndStyle": true,
+    "plugins": ["prettier-plugin-organize-imports"],
+    "embeddedLanguageFormatting": "auto",
+    "overrides": [
+        {
+            "files": "*.json",
+            "options": {
+                "printWidth": 200,
+                "tabWidth": 4,
+                "useTabs": false
+            }
+        }
+    ]
+}

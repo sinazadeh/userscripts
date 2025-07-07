@@ -1,0 +1,42 @@
+name: Update userscript meta
+
+permissions:
+    contents: write
+
+on:
+    push:
+        paths:
+            - '*.user.js'
+
+jobs:
+    extract_meta:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v3
+              with:
+                  fetch-depth: 0
+                  persist-credentials: true
+
+            - name: Extract metadata for all userscripts
+              run: |
+                  shopt -s nullglob
+                  for file in *.user.js; do
+                    if [[ "$file" != *_meta.user.js ]]; then
+                      out="${file%.user.js}_meta.user.js"
+                      echo "Generating $out from $file"
+                      sed -n '/^\/\/ ==UserScript==$/,/^\/\/ ==\/UserScript==$/p' "$file" > "$out"
+                    fi
+                  done
+
+            - name: Amend generated meta into last commit
+              uses: stefanzweifel/git-auto-commit-action@v4
+              with:
+                  commit_message: 'chore: update userscript meta'
+                  file_pattern: '*_meta.user.js'
+                  # amend instead of creating a new commit
+                  commit_options: '--amend --no-edit'
+                  # force the amended commit back up
+                  push_options: '--force-with-lease'
+                  commit_user_name: 'github-actions'
+                  commit_user_email: 'actions@github.com'
