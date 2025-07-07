@@ -31,8 +31,8 @@
     "test:code": "eslint --ignore-path .gitignore --ignore-path .prettierignore --ext .js,.jsx .",
     "test": "yarn test:other && yarn test:code"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/lipis/prettier-setup"
-  }
+  "repository": "https://github.com/lipis/prettier-setup",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Sina Zadeh <s.hossinzade@gmail.com>"
 }
