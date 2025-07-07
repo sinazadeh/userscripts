@@ -21,11 +21,27 @@ if (!scriptId || !filePath) {
     process.exit(1);
 }
 
-// endpoint (with trailing slash!)
-const NEW_VERSION_URL = `https://greasyfork.org/en/scripts/${scriptId}/versions/new/`;
+// URLs
+const FORM_URL = `https://greasyfork.org/en/scripts/${scriptId}/versions/new/`;
+const POST_URL = `https://greasyfork.org/en/scripts/${scriptId}/versions`;
+
+// Grab your session cookie from env
+const session = process.env.GREASYFORK_SESSION;
+if (!session) {
+    console.error('❌ Missing GREASYFORK_SESSION env variable');
+    process.exit(1);
+}
+const cookieHeader = {Cookie: `_greasyfork_session=${session}`};
 
 async function fetchAuthenticityToken() {
-    const res = await axios.get(NEW_VERSION_URL);
+    const res = await axios.get(FORM_URL, {
+        headers: {
+            ...cookieHeader,
+            // mimic a normal browser
+            'User-Agent': 'Mozilla/5.0',
+            Accept: 'text/html',
+        },
+    });
     const m = res.data.match(/name="authenticity_token" value="([^"]+)"/);
     if (!m) throw new Error('Cannot find authenticity_token on page');
     return m[1];
@@ -37,22 +53,25 @@ async function main() {
 
     form.append('authenticity_token', token);
     form.append('version[script]', scriptId);
-
-    // only append changes if passed
     if (changes) {
         form.append('version[changes]', changes);
     }
-
     form.append('version[file]', fs.createReadStream(path.resolve(filePath)));
     // Greasy Fork defaults
     form.append('additional_info', 'true');
     form.append('adult_content', '0');
 
-    const headers = form.getHeaders();
+    // merge FormData headers (including boundary) with our cookie
+    const headers = {
+        ...form.getHeaders(),
+        ...cookieHeader,
+        'User-Agent': 'Mozilla/5.0',
+        Accept: 'text/html',
+    };
 
     try {
-        console.log(`Uploading to ${NEW_VERSION_URL}`);
-        const resp = await axios.post(NEW_VERSION_URL, form, {headers});
+        console.log(`Uploading to ${POST_URL}`);
+        const resp = await axios.post(POST_URL, form, {headers});
         if (resp.status === 200) {
             console.log('✅ Upload succeeded');
         } else {
@@ -63,7 +82,6 @@ async function main() {
         // strip cookies before logging
         if (error.config?.headers) {
             delete error.config.headers['Cookie'];
-            delete error.config.headers['cookie'];
         }
         console.error('❌ Upload failed:', {
             url: error.config?.url,
@@ -74,11 +92,11 @@ async function main() {
 
         if (error.response?.data) {
             fs.writeFileSync(
-                'debug_corrected_422.html',
+                'debug_corrected_404.html',
                 error.response.data,
                 'utf8',
             );
-            console.error('📝 Wrote debug_corrected_422.html');
+            console.error('📝 Wrote debug_corrected_404.html');
         }
         process.exit(1);
     }
