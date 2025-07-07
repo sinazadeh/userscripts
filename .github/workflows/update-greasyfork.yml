@@ -23,7 +23,13 @@ jobs:
               run: |
                   npm init -y
                   npm install axios form-data
+
             - name: Run GreasyFork uploader
               env:
                   GREASYFORK_SESSION: ${{ secrets.GREASYFORK_SESSION }}
-              run: node greasyfork-update.js
+                  SCRIPT_ID: 538095
+                  FILE: Persian_Font_Fix_Vazir.user.js
+              run: |
+                  node greasyfork-update.js \
+                    --script "$SCRIPT_ID" \
+                    --file   "$FILE"

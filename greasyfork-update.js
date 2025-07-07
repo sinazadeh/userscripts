@@ -3,7 +3,7 @@ const path = require('path');
 const axios = require('axios');
 const FormData = require('form-data');
 
-// ——— Basic flag parsing (expects even-numbered --flag value pairs) ———
+// ——— Simple flag parsing ———
 const args = {};
 const raw = process.argv.slice(2);
 for (let i = 0; i < raw.length; i++) {
@@ -16,15 +16,14 @@ for (let i = 0; i < raw.length; i++) {
 }
 
 const {script: scriptId, file: filePath, changes} = args;
-if (!scriptId || !filePath || !changes) {
-    console.error('Usage: --script <id> --file <path> --changes "<text>"');
+if (!scriptId || !filePath) {
+    console.error('Usage: --script <id> --file <path> [--changes "<text>"]');
     process.exit(1);
 }
 
-// Correct endpoint (note trailing slash)
+// endpoint (with trailing slash!)
 const NEW_VERSION_URL = `https://greasyfork.org/en/scripts/${scriptId}/versions/new/`;
 
-// Fetch the Rails authenticity_token from the form page
 async function fetchAuthenticityToken() {
     const res = await axios.get(NEW_VERSION_URL);
     const m = res.data.match(/name="authenticity_token" value="([^"]+)"/);
@@ -36,10 +35,14 @@ async function main() {
     const token = await fetchAuthenticityToken();
     const form = new FormData();
 
-    // required form fields
     form.append('authenticity_token', token);
     form.append('version[script]', scriptId);
-    form.append('version[changes]', changes);
+
+    // only append changes if passed
+    if (changes) {
+        form.append('version[changes]', changes);
+    }
+
     form.append('version[file]', fs.createReadStream(path.resolve(filePath)));
     // Greasy Fork defaults
     form.append('additional_info', 'true');
@@ -57,8 +60,8 @@ async function main() {
             process.exit(1);
         }
     } catch (error) {
-        // mask cookies before logging
-        if (error.config && error.config.headers) {
+        // strip cookies before logging
+        if (error.config?.headers) {
             delete error.config.headers['Cookie'];
             delete error.config.headers['cookie'];
         }
@@ -69,7 +72,6 @@ async function main() {
             headers: error.config?.headers,
         });
 
-        // dump HTML for debugging
         if (error.response?.data) {
             fs.writeFileSync(
                 'debug_corrected_422.html',
