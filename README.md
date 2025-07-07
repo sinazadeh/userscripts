@@ -1,15 +1,17 @@
-# userscripts
+# Userscripts
 
-What I think are necessary userscripts to boost user experience.
+A curated collection of userscripts designed to enhance your browsing experience.
 
-* **Persian Font Fix (Vazir)**
+---
 
-Apply Vazir font to Persian/RTL content across selected websites.
+### 🔤 **Persian Font Fix (Vazir)**  
+Improves the readability of Persian and RTL content by applying the **Vazir** font across supported websites.
 
-**Prerequisites:**
+**🛠 Prerequisites:**  
+To ensure proper rendering, install the following fonts on your system:
 
-Download and install Vazirmatn:
-https://fonts.google.com/specimen/Vazirmatn
+- **Vazirmatn:**  
+  [https://fonts.google.com/specimen/Vazirmatn](https://fonts.google.com/specimen/Vazirmatn)
 
-Download and install Noto Sans:
-https://fonts.google.com/noto/specimen/Noto+Sans
+- **Noto Sans:**  
+  [https://fonts.google.com/noto/specimen/Noto+Sans](https://fonts.google.com/noto/specimen/Noto+Sans)
