@@ -21,11 +21,8 @@ jobs:
 
             - name: Install dependencies
               run: |
-                  # initialize npm (if you don't already have a package.json)
                   npm init -y
-                  # install only the HTTP‐upload libraries
-                  npm install axios form-data tough-cookie cheerio axios-cookiejar-support
-
+                  npm install axios form-data
             - name: Run GreasyFork uploader
               env:
                   GREASYFORK_SESSION: ${{ secrets.GREASYFORK_SESSION }}
