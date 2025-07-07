@@ -1,88 +1,88 @@
-// greasyfork-update.js
-const {chromium} = require('playwright');
-require('dotenv').config();
-const path = require('path');
+// This script uses your GreasyFork `_greasyfork_session` cookie stored in GitHub Secrets
+const axios = require('axios');
+const FormData = require('form-data');
+const fs = require('fs');
+const tough = require('tough-cookie');
+const cheerio = require('cheerio');
+const {default: axiosCookieJarSupport} = require('axios-cookiejar-support');
 
-(async () => {
-    // Launch browser in headless mode with a non-headless userAgent to avoid bot detection
-    const browser = await chromium.launch({headless: true});
-    const userAgent =
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) ' +
-        'AppleWebKit/537.36 (KHTML, like Gecko) ' +
-        'Chrome/117.0.0.0 Safari/537.36';
+// enable cookie jar support
+axiosCookieJarSupport(axios);
+const jar = new tough.CookieJar();
 
-    // Create a new context with custom userAgent and viewport
-    const context = await browser.newContext({
-        userAgent,
-        viewport: {width: 1280, height: 800},
-    });
-
-    // Prevent WebDriver flag detection
-    await context.addInitScript(() => {
-        Object.defineProperty(navigator, 'webdriver', {get: () => false});
-    });
-
-    const page = await context.newPage();
-
-    // Log console messages from the page
-    page.on('console', msg => console.log('PAGE LOG ▶', msg.text()));
-
-    // 1) Go to sign-in page
-    await page.goto('https://greasyfork.org/en/users/sign_in', {
-        waitUntil: 'networkidle',
-    });
-    console.log('▶ at sign-in page, URL=', page.url());
-    await page.screenshot({path: 'debug-signin.png'});
-
-    // 2) Wait for login inputs
-    await page.waitForSelector('input[name="user[email]"]', {timeout: 30000});
-    await page.waitForSelector('input[name="user[password]"]', {
-        timeout: 30000,
-    });
-
-    // 3) Fill credentials and submit
-    await page.fill('input[name="user[email]"]', process.env.GREASYFORK_EMAIL);
-    await page.fill(
-        'input[name="user[password]"]',
-        process.env.GREASYFORK_PASSWORD,
+// Load session cookie from environment variable
+const sessionValue = process.env.GREASYFORK_SESSION;
+if (!sessionValue) {
+    console.error(
+        '❌ GREASYFORK_SESSION not set. Please add it as a Repository Secret.',
     );
-    await Promise.all([
-        page.click('input[type="submit"][name="commit"]'),
-        page.waitForNavigation({timeout: 60000}),
-    ]);
-    console.log('▶ after login, URL=', page.url());
-    await page.screenshot({path: 'debug-after-login.png'});
+    process.exit(1);
+}
 
-    // 4) Confirm script ownership page
-    const scriptSlug = '538095-persian-font-fix-vazir';
-    await page.goto(`https://greasyfork.org/en/scripts/${scriptSlug}`, {
-        waitUntil: 'networkidle',
-    });
-    console.log('▶ at script page, URL=', page.url());
-    await page.screenshot({path: 'debug-script-page.png'});
+// Set the `_greasyfork_session` cookie
+const sessionCookie = new tough.Cookie({
+    key: '_greasyfork_session',
+    value: sessionValue,
+    domain: 'greasyfork.org',
+    path: '/',
+    secure: true,
+    httpOnly: true,
+});
+jar.setCookieSync(sessionCookie.toString(), 'https://greasyfork.org');
 
-    // 5) Navigate to new-version form
-    await page.goto(
-        `https://greasyfork.org/en/scripts/${scriptSlug}/versions/new`,
-        {waitUntil: 'networkidle'},
+// Configure HTTP client
+const client = axios.create({
+    baseURL: 'https://greasyfork.org',
+    jar,
+    withCredentials: true,
+    headers: {
+        'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) ' +
+            'AppleWebKit/537.36 (KHTML, like Gecko) ' +
+            'Chrome/117.0.0.0 Safari/537.36',
+    },
+});
+
+async function main() {
+    const scriptId = '538095';
+
+    // 1) Fetch "new version" form
+    const formPage = await client.get(`/en/scripts/${scriptId}/versions/new`);
+    const $ = cheerio.load(formPage.data);
+    const versionToken = $('input[name="authenticity_token"]').attr('value');
+    if (!versionToken) {
+        console.error(
+            '❌ Failed to retrieve authenticity_token. Session may be invalid.',
+        );
+        process.exit(1);
+    }
+
+    // 2) Build multipart form data
+    const form = new FormData();
+    form.append('authenticity_token', versionToken);
+    form.append(
+        'script_code_file',
+        fs.createReadStream(
+            path.resolve(__dirname, 'Persian_Font_Fix_Vazir.user.js'),
+        ),
     );
-    console.log('▶ at versions/new, URL=', page.url());
-    await page.screenshot({path: 'debug-versions-new.png'});
+    form.append('commit', 'Upload this version');
 
-    // 6) Wait for file input and upload script
-    await page.waitForSelector('input[type="file"]', {timeout: 30000});
-    console.log('▶ file input is present');
-    await page.setInputFiles(
-        'input[type="file"]',
-        path.resolve(__dirname, 'Persian_Font_Fix_Vazir.user.js'),
+    // 3) POST new version
+    const uploadRes = await client.post(
+        `/en/scripts/${scriptId}/versions`,
+        form,
+        {
+            headers: form.getHeaders(),
+            maxRedirects: 0,
+            validateStatus: s => s === 302,
+        },
     );
 
-    // 7) Submit the new version
-    await Promise.all([
-        page.click('input[type="submit"][name="commit"]'),
-        page.waitForNavigation({timeout: 60000}),
-    ]);
-    console.log('✅ upload finished, URL=', page.url());
+    console.log('✅ Successfully uploaded new version to GreasyFork');
+}
 
-    await browser.close();
-})();
+main().catch(err => {
+    console.error('Error during GreasyFork upload:', err.message);
+    process.exit(1);
+});
