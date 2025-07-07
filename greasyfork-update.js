@@ -1,4 +1,4 @@
-// Simplified version for debugging - only essential fields
+// Corrected version based on form analysis
 const axios = require('axios');
 const FormData = require('form-data');
 const fs = require('fs');
@@ -56,36 +56,52 @@ async function main() {
 
     console.log('✅ Authenticity token retrieved');
 
-    // Log the form structure for debugging
-    console.log('\n🔍 Form analysis:');
-    $('form').each((i, form) => {
-        const action = $(form).attr('action');
-        const method = $(form).attr('method');
-        console.log(`Form ${i}: action="${action}", method="${method}"`);
+    // Get default values for required fields
+    const additionalInfoDefault = $(
+        'input[name="script_version[additional_info][0][attribute_default]"]',
+    ).attr('value');
+    const adultContentDefault = $(
+        'input[name="script[adult_content_self_report]"][type="hidden"]',
+    ).attr('value');
 
-        $(form)
-            .find('input, textarea, select')
-            .each((j, input) => {
-                const name = $(input).attr('name');
-                const type = $(input).attr('type');
-                const value = $(input).attr('value');
-                const required = $(input).attr('required');
-                console.log(
-                    `  Field: name="${name}", type="${type}", value="${value}", required="${required}"`,
-                );
-            });
-    });
+    console.log('📝 Required field defaults:');
+    console.log(`  - additional_info default: ${additionalInfoDefault}`);
+    console.log(`  - adult_content default: ${adultContentDefault}`);
 
-    // Create minimal form - only essential fields
+    // Create form with all required fields
     const form = new FormData();
+
+    // Authentication
     form.append('authenticity_token', versionToken);
-    form.append('script_code_file', fs.createReadStream(scriptFilePath), {
+
+    // File upload - use the correct field name
+    form.append('code_upload', fs.createReadStream(scriptFilePath), {
         filename: scriptFileName,
         contentType: 'text/javascript',
     });
-    form.append('commit', 'Upload this version');
 
-    console.log('\n📤 Uploading with minimal form data...');
+    // Required hidden fields
+    form.append(
+        'script_version[additional_info][0][attribute_default]',
+        additionalInfoDefault || 'true',
+    );
+    form.append(
+        'script[adult_content_self_report]',
+        adultContentDefault || '0',
+    );
+
+    // Required radio buttons - set defaults
+    form.append('script_version[additional_info][0][value_markup]', 'markdown');
+    form.append('script_version[changelog_markup]', 'markdown');
+    form.append('script[script_type]', '1'); // Userscript
+
+    // Optional fields that might be required
+    form.append('script_version[attachments][]', ''); // Empty attachments
+
+    // Submit button
+    form.append('commit', 'Post new version');
+
+    console.log('📤 Uploading with corrected form data...');
     try {
         const uploadRes = await client.post(
             `/en/scripts/${scriptId}/versions`,
@@ -93,6 +109,8 @@ async function main() {
             {
                 headers: {
                     ...form.getHeaders(),
+                    Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                    'Accept-Language': 'en-US,en;q=0.5',
                     Referer: `https://greasyfork.org/en/scripts/${scriptId}/versions/new`,
                     Origin: 'https://greasyfork.org',
                 },
@@ -103,7 +121,7 @@ async function main() {
 
         console.log('✅ Success!');
         if (uploadRes.status === 302) {
-            console.log('Redirect location:', uploadRes.headers.location);
+            console.log('🔄 Redirected to:', uploadRes.headers.location);
         }
     } catch (err) {
         console.error('❌ Upload failed');
@@ -114,25 +132,65 @@ async function main() {
             );
 
             if (err.response.status === 422) {
-                // Save full response for manual inspection
-                fs.writeFileSync('debug_422_response.html', err.response.data);
-                console.error('Full response saved to debug_422_response.html');
+                // Save and analyze the error response
+                fs.writeFileSync('debug_corrected_422.html', err.response.data);
+                console.error(
+                    'Full response saved to debug_corrected_422.html',
+                );
 
-                // Try to extract error messages
+                // Extract error messages
                 const errorPage = cheerio.load(err.response.data);
                 const title = errorPage('title').text();
                 console.error(`Page title: ${title}`);
 
-                // Look for error messages
-                const errors = [];
-                errorPage('.alert, .error, .notice, .flash').each((i, elem) => {
-                    const text = errorPage(elem).text().trim();
-                    if (text) errors.push(text);
+                // Look for specific error messages
+                const errorSelectors = [
+                    '.alert-danger',
+                    '.alert-error',
+                    '.error',
+                    '.field_with_errors',
+                    '.help-block',
+                    '.invalid-feedback',
+                    '#error_explanation',
+                    '.notice',
+                ];
+
+                let foundErrors = false;
+                errorSelectors.forEach(selector => {
+                    errorPage(selector).each((i, elem) => {
+                        const text = errorPage(elem).text().trim();
+                        if (text) {
+                            console.error(
+                                `🔍 Error found (${selector}): ${text}`,
+                            );
+                            foundErrors = true;
+                        }
+                    });
                 });
 
-                if (errors.length > 0) {
-                    console.error('Error messages found:');
-                    errors.forEach(err => console.error(`  - ${err}`));
+                if (!foundErrors) {
+                    console.error(
+                        '🔍 No specific error messages found in standard locations',
+                    );
+
+                    // Check for any text containing common error keywords
+                    const pageText = errorPage('body').text().toLowerCase();
+                    const errorKeywords = [
+                        'error',
+                        'invalid',
+                        'required',
+                        'missing',
+                        'failed',
+                        'cannot',
+                    ];
+
+                    errorKeywords.forEach(keyword => {
+                        if (pageText.includes(keyword)) {
+                            console.error(
+                                `📝 Page contains keyword: ${keyword}`,
+                            );
+                        }
+                    });
                 }
             }
         }
