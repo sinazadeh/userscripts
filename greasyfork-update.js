@@ -10,7 +10,6 @@ const {wrapper} = require('axios-cookiejar-support');
 
 // Create a new cookie jar
 const jar = new tough.CookieJar();
-
 // Create a new axios instance wrapped with cookie jar support
 const client = wrapper(axios.create({jar}));
 
@@ -44,11 +43,24 @@ client.defaults.headers.common['User-Agent'] =
 
 async function main() {
     const scriptId = '538095';
+    const scriptFileName = 'Persian_Font_Fix_Vazir.user.js';
+    const scriptFilePath = path.resolve(__dirname, scriptFileName);
+
+    // Check if the script file exists
+    if (!fs.existsSync(scriptFilePath)) {
+        console.error(`❌ Script file not found: ${scriptFileName}`);
+        console.error(`Looking for file at: ${scriptFilePath}`);
+        process.exit(1);
+    }
+
+    console.log(`✅ Script file found: ${scriptFileName}`);
 
     // 1) Fetch "new version" form
     console.log('Fetching authenticity token...');
     const formPage = await client.get(`/en/scripts/${scriptId}/versions/new`);
     const $ = cheerio.load(formPage.data);
+
+    // Get authenticity token
     const versionToken = $('input[name="authenticity_token"]').attr('value');
     if (!versionToken) {
         console.error(
@@ -58,30 +70,85 @@ async function main() {
     }
     console.log('✅ Authenticity token retrieved.');
 
+    // Check for additional hidden form fields that might be required
+    const hiddenFields = {};
+    $('input[type="hidden"]').each((i, elem) => {
+        const name = $(elem).attr('name');
+        const value = $(elem).attr('value');
+        if (name && value && name !== 'authenticity_token') {
+            hiddenFields[name] = value;
+            console.log(`Found hidden field: ${name} = ${value}`);
+        }
+    });
+
     // 2) Build multipart form data
     const form = new FormData();
     form.append('authenticity_token', versionToken);
-    form.append(
-        'script_code_file',
-        fs.createReadStream(
-            path.resolve(__dirname, 'Persian_Font_Fix_Vazir.user.js'),
-        ),
-    );
+
+    // Add any additional hidden fields
+    Object.keys(hiddenFields).forEach(key => {
+        form.append(key, hiddenFields[key]);
+    });
+
+    // Add the script file
+    form.append('script_code_file', fs.createReadStream(scriptFilePath), {
+        filename: scriptFileName,
+        contentType: 'application/javascript',
+    });
+
+    // Add commit button value
     form.append('commit', 'Upload this version');
 
     // 3) POST new version
     console.log('Uploading new script version...');
-    const uploadRes = await client.post(
-        `/en/scripts/${scriptId}/versions`,
-        form,
-        {
-            headers: form.getHeaders(),
-            maxRedirects: 0,
-            validateStatus: s => s === 302,
-        },
-    );
+    try {
+        const uploadRes = await client.post(
+            `/en/scripts/${scriptId}/versions`,
+            form,
+            {
+                headers: {
+                    ...form.getHeaders(),
+                    Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                    'Accept-Language': 'en-US,en;q=0.5',
+                    'Accept-Encoding': 'gzip, deflate',
+                    Referer: `https://greasyfork.org/en/scripts/${scriptId}/versions/new`,
+                    Origin: 'https://greasyfork.org',
+                },
+                maxRedirects: 0,
+                validateStatus: s => s === 302 || s === 200,
+            },
+        );
 
-    console.log('✅ Successfully uploaded new version to GreasyFork');
+        if (uploadRes.status === 302) {
+            console.log(
+                '✅ Successfully uploaded new version to GreasyFork (redirected)',
+            );
+            console.log('Redirect location:', uploadRes.headers.location);
+        } else {
+            console.log('✅ Successfully uploaded new version to GreasyFork');
+        }
+    } catch (err) {
+        if (err.response && err.response.status === 422) {
+            console.error('❌ Validation error (422). Response body:');
+            console.error(err.response.data);
+
+            // Try to parse HTML for error messages
+            const errorPage = cheerio.load(err.response.data);
+            const errorMessages = [];
+            errorPage('.alert-danger, .error, .field_with_errors').each(
+                (i, elem) => {
+                    const text = errorPage(elem).text().trim();
+                    if (text) errorMessages.push(text);
+                },
+            );
+
+            if (errorMessages.length > 0) {
+                console.error('Validation errors found:');
+                errorMessages.forEach(msg => console.error(`  - ${msg}`));
+            }
+        }
+        throw err;
+    }
 }
 
 main().catch(err => {
@@ -92,7 +159,16 @@ main().catch(err => {
             err.response.status,
             err.response.statusText,
         );
-        console.error('Response data:', err.response.data);
+
+        // Log response headers for debugging
+        console.error('Response headers:', err.response.headers);
+
+        // Only log response data if it's not too long
+        if (err.response.data && err.response.data.length < 2000) {
+            console.error('Response data:', err.response.data);
+        } else {
+            console.error('Response data too long to display');
+        }
     } else {
         console.error('Error during GreasyFork upload:', err.message);
     }
