@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Emoji Font Override
 // @namespace    https://github.com/sinazadeh/userscripts
-// @version      1.0.5
+// @version      1.0.6
 // @description  Override default emoji fonts to prioritize Noto Color Emoji for consistent rendering of Unicode 16 emoji across all websites.
 // @author       TheSina
 // @match        *://*/*
