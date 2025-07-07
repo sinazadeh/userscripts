@@ -29,14 +29,10 @@ jobs:
                     fi
                   done
 
-            - name: Amend generated meta into last commit
+            - name: Commit generated meta files
               uses: stefanzweifel/git-auto-commit-action@v4
               with:
                   commit_message: 'chore: update userscript meta'
                   file_pattern: '*_meta.user.js'
-                  # amend instead of creating a new commit
-                  commit_options: '--amend --no-edit'
-                  # force the amended commit back up
-                  push_options: '--force-with-lease'
                   commit_user_name: 'github-actions'
                   commit_user_email: 'actions@github.com'

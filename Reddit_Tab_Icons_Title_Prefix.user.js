@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Reddit Tab Icons & Title Prefix
 // @namespace https://github.com/sinazadeh/userscripts
-// @version      1.3.5
+// @version      1.3.6
 // @description  Adds subreddit icons to Reddit tabs and prefixes the tab title with r/SubredditName for easier tab identification and navigation.
 // @author       TheSina
 // @match        https://*.reddit.com/*
