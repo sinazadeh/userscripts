@@ -5,13 +5,13 @@ A curated collection of userscripts designed to enhance your browsing experience
 ## Table of Contents
 
 - [🛡️ Reddit Tab Icons & Title Prefix](#-reddit-tab-icons-title-prefix)
-- [😀 Emoji Font Override](#emoji-font-override)
-- [↪️ Bypass Link Redirects](#bypass-link-redirects)
-- [🖼️ Always Load HD Reddit Images](#always-load-hd-reddit-images)
-- [🔍 Google Search: Stremio Links](#google-search-stremio-links)
-- [🎬 Letterboxd Link Badges](#letterboxd-link-badges)
-- [📖 Open All Thread Pages](#open-all-thread-pages)
-- [🔤 Persian Font Fix (Vazir)](#persian-font-fix-vazir)
+- [😀 Emoji Font Override](#-emoji-font-override)
+- [↪️ Bypass Link Redirects](#-bypass-link-redirects)
+- [🖼️ Always Load HD Reddit Images](#-always-load-hd-reddit-images)
+- [🔍 Google Search: Stremio Links](#-google-search-stremio-links)
+- [🎬 Letterboxd Link Badges](#-letterboxd-link-badges)
+- [📖 Open All Thread Pages](#-open-all-thread-pages)
+- [🔤 Persian Font Fix (Vazir)](#-persian-font-fix-vazir)
 
 ---
 ## 🛡️ Reddit Tab Icons & Title Prefix
@@ -30,7 +30,6 @@ To install the script, click [here](https://raw.githubusercontent.com/sinazadeh/
 - Efficient caching and minimal network requests.
 
 ---
-<a name="emoji-font-override"></a>
 ## 😀 Emoji Font Override
 
 Enhances emoji rendering across websites by prioritizing **Noto Color Emoji** over system default (Segoe UI Emoji). Ensures consistent and up-to-date display of modern Unicode 16 emojis.
@@ -63,7 +62,6 @@ Noto Color Emoji, Segoe UI Emoji, Twemoji Mozilla
 Check out [Emojipedia’s Unicode 16.0 overview](https://emojipedia.org/unicode-16.0) for the latest emoji additions.
 
 ---
-<a name="bypass-link-redirects"></a>
 ## ↪️ Bypass Link Redirects
 
 Automatically bypasses intermediate confirmation, warning, and interstitial pages on supported websites, taking you directly to the destination link.
@@ -73,7 +71,6 @@ Automatically bypasses intermediate confirmation, warning, and interstitial page
 To install the script, click [here](https://raw.githubusercontent.com/sinazadeh/userscripts/refs/heads/main/Bypass_Link_Redirects.user.js).
 
 ---
-<a name="always-load-hd-reddit-images"></a>
 ## 🖼️ Always Load HD Reddit Images
 
 Automatically replaces blurry Reddit image previews with their full-resolution originals as you scroll. Includes a menu command to toggle the feature on or off.
@@ -91,7 +88,6 @@ To install the script, click [here](https://raw.githubusercontent.com/sinazadeh/
 - Dynamically handles new images loaded via infinite scroll.
 
 ---
-<a name="google-search-stremio-links"></a>
 ## 🔍 Google Search: Stremio Links
 
 Adds convenient "Watch on Stremio" buttons (App & Web) next to IMDb links in Google search results.
@@ -108,7 +104,6 @@ To install the script, click [here](https://raw.githubusercontent.com/sinazadeh/
 
 
 ---
-<a name="letterboxd-link-badges"></a>
 ## 🎬 Letterboxd Link Badges
 
 Enhances Letterboxd film pages by replacing IMDb/TMDb text links with icons and adding direct "Watch on Stremio" badges.
@@ -124,7 +119,6 @@ To install the script, click [here](https://raw.githubusercontent.com/sinazadeh/
 - Dynamically injects badges on page load and handles Letterboxd's PJAX navigation.
 
 ---
-<a name="open-all-thread-pages"></a>
 ## 📖 Open All Thread Pages
 
 Adds a convenient "Open All" button to forum threads, allowing you to load every page into a new tab with a single click.
@@ -140,7 +134,6 @@ To install the script, click [here](https://raw.githubusercontent.com/sinazadeh/
 - Includes a safety confirmation for opening a large number of tabs (over 50).
 
 ---
-<a name="persian-font-fix-vazir"></a>
 ## 🔤 Persian Font Fix (Vazir)
 
 Improves the readability of Persian and RTL content by applying the **Vazir** font across supported websites.
