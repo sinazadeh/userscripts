@@ -4,7 +4,7 @@ A curated collection of userscripts designed to enhance your browsing experience
 
 ## Table of Contents
 
-- [🛡️ Reddit Tab Icons & Title Prefix](#-reddit-tab-icons-title-prefix)
+- [🛡️ Reddit Tab Icons & Title Prefix](#-reddit-tab-icons--title-prefix)
 - [😀 Emoji Font Override](#-emoji-font-override)
 - [↪️ Bypass Link Redirects](#-bypass-link-redirects)
 - [🖼️ Always Load HD Reddit Images](#-always-load-hd-reddit-images)
@@ -14,7 +14,7 @@ A curated collection of userscripts designed to enhance your browsing experience
 - [🔤 Persian Font Fix (Vazir)](#-persian-font-fix-vazir)
 
 ---
-## 🛡️ Reddit Tab Icons & Title Prefix
+## 🛡 Reddit Tab Icons & Title Prefix
 
 Adds subreddit icons to Reddit tabs and prefixes the tab title with `r/SubredditName` for easier tab identification and navigation.
 
@@ -62,7 +62,7 @@ Noto Color Emoji, Segoe UI Emoji, Twemoji Mozilla
 Check out [Emojipedia’s Unicode 16.0 overview](https://emojipedia.org/unicode-16.0) for the latest emoji additions.
 
 ---
-## ↪️ Bypass Link Redirects
+## ↪ Bypass Link Redirects
 
 Automatically bypasses intermediate confirmation, warning, and interstitial pages on supported websites, taking you directly to the destination link.
 
@@ -71,7 +71,7 @@ Automatically bypasses intermediate confirmation, warning, and interstitial page
 To install the script, click [here](https://raw.githubusercontent.com/sinazadeh/userscripts/refs/heads/main/Bypass_Link_Redirects.user.js).
 
 ---
-## 🖼️ Always Load HD Reddit Images
+## 🖼 Always Load HD Reddit Images
 
 Automatically replaces blurry Reddit image previews with their full-resolution originals as you scroll. Includes a menu command to toggle the feature on or off.
 
