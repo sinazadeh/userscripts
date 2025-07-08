@@ -15,6 +15,7 @@ A curated collection of userscripts designed to enhance your browsing experience
 
 ---
 ## 🛡 Reddit Tab Icons & Title Prefix
+*Forked from [rybak/subreddit-tab-icons](https://github.com/rybak/subreddit-tab-icons)*
 
 Adds subreddit icons to Reddit tabs and prefixes the tab title with `r/SubredditName` for easier tab identification and navigation.
 
@@ -89,6 +90,7 @@ To install the script, click [here](https://raw.githubusercontent.com/sinazadeh/
 
 ---
 ## 🔍 Google Search: Stremio Links
+*Forked from [erolcanulutas/Stremio-Movie-Search](https://github.com/erolcanulutas/Stremio-Movie-Search---Firefox)*
 
 Adds convenient "Watch on Stremio" buttons (App & Web) next to IMDb links in Google search results.
 
