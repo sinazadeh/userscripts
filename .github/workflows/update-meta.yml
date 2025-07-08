@@ -22,8 +22,8 @@ jobs:
               run: |
                   shopt -s nullglob
                   for file in *.user.js; do
-                    if [[ "$file" != *_meta.user.js ]]; then
-                      out="${file%.user.js}_meta.user.js"
+                    if [[ "$file" != *.meta.js ]]; then
+                      out="${file%.user.js}.meta.js"
                       echo "Generating $out from $file"
                       sed -n '/^\/\/ ==UserScript==$/,/^\/\/ ==\/UserScript==$/p' "$file" > "$out"
                     fi
@@ -33,6 +33,6 @@ jobs:
               uses: stefanzweifel/git-auto-commit-action@v4
               with:
                   commit_message: 'chore: update userscript meta'
-                  file_pattern: '*_meta.user.js'
+                  file_pattern: '*.meta.js'
                   commit_user_name: 'github-actions'
                   commit_user_email: 'actions@github.com'

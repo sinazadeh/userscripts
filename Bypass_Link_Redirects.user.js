@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bypass Link Redirects
 // @namespace    https://github.com/sinazadeh/userscripts
-// @version      1.2.2
+// @version      1.2.3
 // @description  Automatically bypasses intermediate confirmation, warning, and interstitial pages on supported websites, taking you directly to the destination link.
 // @author       TheSina
 // @match        *://forums.socialmediagirls.com/goto/link-confirmation*
@@ -10,7 +10,7 @@
 // @run-at       document-start
 // @license      MIT
 // @downloadURL  https://raw.githubusercontent.com/sinazadeh/userscripts/refs/heads/main/Bypass_Link_Redirects.user.js
-// @updateURL    https://raw.githubusercontent.com/sinazadeh/userscripts/refs/heads/main/Bypass_Link_Redirects_meta.user.js
+// @updateURL    https://raw.githubusercontent.com/sinazadeh/userscripts/refs/heads/main/Bypass_Link_Redirects.meta.js
 // ==/UserScript==
 
 (function () {

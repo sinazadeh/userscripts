@@ -9,7 +9,7 @@
 // @run-at       document-start
 // @license      MIT
 // @downloadURL  https://raw.githubusercontent.com/sinazadeh/userscripts/refs/heads/main/Emoji_Font_Override.user.js
-// @updateURL    https://raw.githubusercontent.com/sinazadeh/userscripts/refs/heads/main/Emoji_Font_Override_meta.user.js
+// @updateURL    https://raw.githubusercontent.com/sinazadeh/userscripts/refs/heads/main/Emoji_Font_Override.meta.js
 // ==/UserScript==
 /* jshint esversion: 6 */
 (function () {

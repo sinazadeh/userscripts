@@ -9,7 +9,7 @@
 // @grant        none
 // @license      MIT
 // @downloadURL  https://raw.githubusercontent.com/sinazadeh/userscripts/refs/heads/main/Reddit_Tab_Icons_Title_Prefix.user.js
-// @updateURL    https://raw.githubusercontent.com/sinazadeh/userscripts/refs/heads/main/Reddit_Tab_Icons_Title_Prefix_meta.user.js
+// @updateURL    https://raw.githubusercontent.com/sinazadeh/userscripts/refs/heads/main/Reddit_Tab_Icons_Title_Prefix.meta.js
 // ==/UserScript==
 
 /* jshint esversion: 8 */
