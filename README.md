@@ -4,7 +4,7 @@ A curated collection of userscripts designed to enhance your browsing experience
 
 ## Table of Contents
 
-- [🛡️ Reddit Tab Icons & Title Prefix](#reddit-tab-icons-title-prefix)
+- [🛡️ Reddit Tab Icons & Title Prefix](#-reddit-tab-icons-title-prefix)
 - [😀 Emoji Font Override](#emoji-font-override)
 - [↪️ Bypass Link Redirects](#bypass-link-redirects)
 - [🖼️ Always Load HD Reddit Images](#always-load-hd-reddit-images)
@@ -14,7 +14,6 @@ A curated collection of userscripts designed to enhance your browsing experience
 - [🔤 Persian Font Fix (Vazir)](#persian-font-fix-vazir)
 
 ---
-<a name="reddit-tab-icons-title-prefix"></a>
 ## 🛡️ Reddit Tab Icons & Title Prefix
 
 Adds subreddit icons to Reddit tabs and prefixes the tab title with `r/SubredditName` for easier tab identification and navigation.
