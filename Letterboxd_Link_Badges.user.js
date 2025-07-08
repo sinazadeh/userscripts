@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Letterboxd Link Badges
 // @namespace    https://github.com/sinazadeh/userscripts
-// @version      1.1.2
+// @version      1.1.6
 // @description  Enhances Letterboxd film pages by replacing IMDb/TMDb text links with icons and adding direct "Watch on Stremio" badges.
 // @author       TheSina
 // @match        https://letterboxd.com/film/*
