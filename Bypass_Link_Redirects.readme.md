@@ -1,7 +1,13 @@
-## ↪ Bypass Link Redirects
+# ↪ Bypass Link Redirects
 
 Automatically bypasses intermediate confirmation, warning, and interstitial pages on supported websites, taking you directly to the destination link.
 
-### **📥 Install from GitHub**
+## **📥 Install from GitHub**
 
 To install the script, click [here](https://raw.githubusercontent.com/sinazadeh/userscripts/refs/heads/main/Bypass_Link_Redirects.user.js).
+
+---
+
+## ⚖️ License
+
+This userscript is open-source and licensed under the [MIT License](https://opensource.org/licenses/MIT).

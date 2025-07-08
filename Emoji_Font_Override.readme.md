@@ -1,23 +1,25 @@
-## 😀 Emoji Font Override
+# 😀 Emoji Font Override
 
 Enhances emoji rendering across websites by prioritizing **Noto Color Emoji** over system default (Segoe UI Emoji). Ensures consistent and up-to-date display of modern Unicode 16 emojis.
 
-### **🛠 Prerequisites**
+## **🛠 Prerequisites**
 
 To ensure proper emoji support, install the following font on your system:
 
 - [Noto Color Emoji](https://fonts.google.com/noto/specimen/Noto+Color+Emoji)
 
-### **📥 Install from GitHub**
+## **📥 Install from GitHub**
 
 To install the script, click [here](https://raw.githubusercontent.com/sinazadeh/userscripts/refs/heads/main/Emoji_Font_Override.user.js).
 
-### **ℹ️ Notes**
+---
+
+## **ℹ️ Notes**
 
 - This script targets websites that specify **Segoe UI Emoji** and swaps in Noto Color Emoji, improving emoji appearance and completeness.
 - It does **not** affect system-level rendering or plain `.txt` files (e.g., [emoji-test.txt](https://www.unicode.org/Public/emoji/latest/emoji-test.txt)).
 
-### **🦊 Firefox Tip**
+## **🦊 Firefox Tip**
 
 To extend emoji support across all websites in Firefox (and its forks), set the `font.name-list.emoji` value in `about:config` to:
 
@@ -25,6 +27,12 @@ To extend emoji support across all websites in Firefox (and its forks), set the 
 Noto Color Emoji, Segoe UI Emoji, Twemoji Mozilla
 ```
 
-### **❓ What’s new in Unicode 16?**
+## **❓ What’s new in Unicode 16?**
 
 Check out [Emojipedia’s Unicode 16.0 overview](https://emojipedia.org/unicode-16.0) for the latest emoji additions.
+
+---
+
+## ⚖️ License
+
+This userscript is open-source and licensed under the [MIT License](https://opensource.org/licenses/MIT).
