@@ -1,11 +1,12 @@
 // ==UserScript==
 // @name         Amazon Filter: Sold by Amazon.com
 // @namespace    https://github.com/sinazadeh/userscripts
-// @version      1.0.0
+// @version      1.1.0
 // @description  Adds a persistent dropdown to Amazon search and category pages to filter products by seller (e.g., 'Sold by Amazon.com', 'All Amazon').
 // @author       TheSina
 // @match        *://www.amazon.com/s*
 // @match        *://www.amazon.com/*/b/*
+// @match        *://www.amazon.com/b/*
 // @grant        none
 // @run-at       document-end
 // @license      MIT
@@ -58,15 +59,20 @@
         const selectedFilter = getCurrentFilter();
         const allowedIds = FILTER_OPTIONS[selectedFilter];
 
-        document
-            .querySelectorAll('[data-component-type="s-search-result"]')
-            .forEach(item => {
-                const merchantId = getMerchantId(item);
-                const match =
-                    allowedIds.length === 0 ||
-                    (merchantId && allowedIds.includes(merchantId));
-                item.style.display = match ? '' : 'none';
-            });
+        // original selector plus new octopus-style cards and any element with a data-csa-c-item-id
+        const allItems = document.querySelectorAll(
+            '[data-component-type="s-search-result"], ' +
+                'div[class*="octopus-search-result-card"], ' +
+                '[data-csa-c-item-id]',
+        );
+
+        allItems.forEach(item => {
+            const merchantId = getMerchantId(item);
+            const match =
+                allowedIds.length === 0 ||
+                (merchantId && allowedIds.includes(merchantId));
+            item.style.display = match ? '' : 'none';
+        });
     }
 
     function createDropdown() {
