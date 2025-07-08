@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Google Search: Stremio Links
 // @namespace    https://github.com/sinazadeh/userscripts
-// @version      1.2.6
+// @version      1.2.7
 // @description  Adds convenient "Watch on Stremio" buttons (App & Web) next to IMDb links in Google search results.
 // @author       TheSina
 // @match        *://www.google.*/*
@@ -20,14 +20,14 @@
     const IMDB_URL_RX = /^https?:\/\/www\.imdb\.com\/title\/(tt\d+)\/?$/;
     const ICON_URL =
         'https://www.google.com/s2/favicons?domain=web.stremio.com&sz=64';
-    const OBSERVE_DELAY = 200; // ms debounce
+    const OBSERVE_DELAY = 200;
 
-    // ——— CSS ———
+    // ——— OUR CSS (lives INSIDE the Shadow DOM) ———
     const STREMIO_CSS = `
     .stremio-btns {
         margin-left: 6px;
-        display: inline-flex !important;
-        align-items: center !important;
+        display: inline-flex;
+        align-items: center;
     }
     .stremio-btn {
         position: relative;
@@ -35,15 +35,14 @@
         height: 20px;
         margin-right: 4px;
         cursor: pointer;
-        /* Prevent any parent transform from flipping us */
+        /* nothing from the page can flip us now */
         transform: none !important;
         writing-mode: horizontal-tb !important;
     }
     .stremio-btn img {
-        display: block;
         width: 100%;
         height: 100%;
-        /* Ensure icon itself isn’t flipped */
+        display: block;
         transform: none !important;
     }
     .stremio-btn span {
@@ -57,14 +56,10 @@
         border-radius: 1px;
         pointer-events: none;
         line-height: 1;
-        /* Prevent flips on the text badge */
         transform: none !important;
         writing-mode: horizontal-tb !important;
     }
     `;
-
-    // ——— INJECT CSS ———
-    GM_addStyle(STREMIO_CSS);
 
     // ——— FIND IMDb LINKS ———
     function findIMDbLinks() {
@@ -73,7 +68,7 @@
         ).filter(a => IMDB_URL_RX.test(a.href));
     }
 
-    // ——— CREATE BUTTON ———
+    // ——— CREATE A BUTTON ELEMENT ———
     function createBtn(label, color, title, onClick) {
         const btn = document.createElement('div');
         btn.className = 'stremio-btn';
@@ -98,11 +93,12 @@
         return btn;
     }
 
-    // ——— ADD BUTTONS ———
+    // ——— INJECT ONE SET OF BUTTONS PER LINK… INSIDE A SHADOW HOST ———
     function addButtons() {
         for (const link of findIMDbLinks()) {
-            // skip if already has our container
-            if (link.parentElement.querySelector('.stremio-btns')) continue;
+            // skip if we’ve already done this one
+            if (link.parentElement.querySelector('stremio-shadow-host'))
+                continue;
 
             const [, imdbId] = link.href.match(IMDB_URL_RX);
             const isSeries = /series|season|episode/i.test(link.href);
@@ -110,6 +106,13 @@
             const appURL = `stremio://detail/${typePath}/${imdbId}`;
             const webURL = `https://web.stremio.com/#/detail/${typePath}/${imdbId}`;
 
+            // create a custom host element
+            const host = document.createElement('stremio-shadow-host');
+            host.style.all = 'initial'; // wipe out any inherited CSS
+            const shadow = host.attachShadow({mode: 'open'});
+
+            // inject our CSS + buttons into the shadow root
+            shadow.innerHTML = `<style>${STREMIO_CSS}</style>`;
             const container = document.createElement('span');
             container.className = 'stremio-btns';
             container.append(
@@ -123,21 +126,22 @@
                     window.open(webURL, '_blank'),
                 ),
             );
+            shadow.appendChild(container);
 
-            // insert right after the <h3> (or the link itself)
+            // stick it right after the <h3> (or the link itself)
             const target = link.querySelector('h3') || link;
-            target.parentElement.insertBefore(container, target.nextSibling);
+            target.parentElement.insertBefore(host, target.nextSibling);
         }
     }
 
-    // ——— DEBOUNCE UTIL ———
+    // ——— DEBOUNCE UTILITY ———
     let timer;
     function debounced(fn, delay = OBSERVE_DELAY) {
         clearTimeout(timer);
         timer = setTimeout(fn, delay);
     }
 
-    // ——— OBSERVE & INITIALIZE ———
+    // ——— WATCH FOR DYNAMIC RESULTS & RUN ———
     new MutationObserver(() => debounced(addButtons)).observe(document, {
         childList: true,
         subtree: true,
