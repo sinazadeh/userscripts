@@ -74,13 +74,29 @@ To install the script, click [here](https://raw.githubusercontent.com/sinazadeh/
 
 ### **✨ Features**
 
--   Replaces low-resolution `preview.redd.it` images with high-resolution `i.redd.it` versions.
--   Works on both `<img>` tags and elements with `background-image`.
--   Uses `IntersectionObserver` for efficient, on-demand loading as you scroll.
--   Includes a Tampermonkey menu command to easily enable or disable the functionality.
--   Dynamically handles new images loaded via infinite scroll.
+- Replaces low-resolution `preview.redd.it` images with high-resolution `i.redd.it` versions.
+- Works on both `<img>` tags and elements with `background-image`.
+- Uses `IntersectionObserver` for efficient, on-demand loading as you scroll.
+- Includes a Tampermonkey menu command to easily enable or disable the functionality.
+- Dynamically handles new images loaded via infinite scroll.
 
---- 
+---
+
+## 🎬 Letterboxd Link Badges
+
+Enhances Letterboxd film pages by replacing IMDb/TMDb text links with icons and adding direct "Watch on Stremio" badges.
+
+### **📥 Install**
+
+To install the script, click [here](https://raw.githubusercontent.com/sinazadeh/userscripts/refs/heads/main/Letterboxd_Link_Badges.user.js).
+
+### **✨ Features**
+
+- Replaces the standard IMDb and TMDb text links with clean, recognizable icons.
+- Adds "Open in Stremio App" and "Open in Stremio Web" buttons for one-click access.
+- Dynamically injects badges on page load and handles Letterboxd's PJAX navigation.
+
+---
 
 ## 📖 Open All Thread Pages
 
