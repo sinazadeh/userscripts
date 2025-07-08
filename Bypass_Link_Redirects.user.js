@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bypass Link Redirects
 // @namespace    https://github.com/sinazadeh/userscripts
-// @version      1.2.1
+// @version      1.2.2
 // @description  Automatically bypasses intermediate confirmation, warning, and interstitial pages on supported websites, taking you directly to the destination link.
 // @author       TheSina
 // @match        *://forums.socialmediagirls.com/goto/link-confirmation*
@@ -46,7 +46,10 @@
     }
 
     // Bypass ImageBam "Continue to your image" interstitial
-    if (hostname.includes('imagebam.com') && path.startsWith('/image/')) {
+    if (
+        hostname.includes('imagebam.com') &&
+        window.location.pathname.startsWith('/image/')
+    ) {
         // Wait for the page to render
         document.addEventListener('DOMContentLoaded', () => {
             // 1) If there's a form on the page, submit it
