@@ -2,6 +2,9 @@
 
 *Forked from [erolcanulutas/Stremio-Movie-Search](https://github.com/erolcanulutas/Stremio-Movie-Search---Firefox)*
 
+![image](https://github.com/user-attachments/assets/106e9aeb-b649-4096-b3c6-ffc3ad23490f)
+
+
 Adds convenient "Watch on Stremio" buttons (App & Web) next to IMDb links in Google search results.
 
 ## **📥 Install from GitHub**
