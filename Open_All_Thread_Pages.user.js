@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Open All Thread Pages
 // @namespace    https://github.com/sinazadeh/userscripts
-// @version      1.0.0
+// @version      1.0.1
 // @description  Adds a convenient "Open All" button to forum threads, allowing you to load every page into a new tab with a single click.
 // @author       TheSina
 // @match        *://*.*/threads/*
