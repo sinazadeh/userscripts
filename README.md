@@ -68,3 +68,13 @@ To ensure proper rendering, install the following fonts on your system:
 ### **📥 Install**
 
 To install the script, click [here](https://raw.githubusercontent.com/sinazadeh/userscripts/refs/heads/main/Persian_Font_Fix_Vazir.user.js).
+
+---
+
+## ↪️ Bypass Link Redirects
+
+Automatically bypasses intermediate confirmation, warning, and interstitial pages on supported websites, taking you directly to the destination link.
+
+### **📥 Install**
+
+To install the script, click [here](https://raw.githubusercontent.com/sinazadeh/userscripts/refs/heads/main/Bypass_Link_Confirmation.user.js).
