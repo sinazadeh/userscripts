@@ -9,4 +9,6 @@
 // @grant        none
 // @run-at       document-end
 // @license      MIT
+// @downloadURL  https://raw.githubusercontent.com/sinazadeh/userscripts/refs/heads/main/Amazon_Filter_Sold_by_Amazoncom.user.js
+// @updateURL    https://raw.githubusercontent.com/sinazadeh/userscripts/refs/heads/main/Amazon_Filter_Sold_by_Amazoncom.meta.js
 // ==/UserScript==
