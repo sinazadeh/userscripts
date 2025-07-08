@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Google Search: Stremio Links
 // @namespace    https://github.com/sinazadeh/userscripts
-// @version      1.2.5
+// @version      1.2.6
 // @description  Adds convenient "Watch on Stremio" buttons (App & Web) next to IMDb links in Google search results.
 // @author       TheSina
 // @match        *://www.google.*/*
@@ -22,11 +22,12 @@
         'https://www.google.com/s2/favicons?domain=web.stremio.com&sz=64';
     const OBSERVE_DELAY = 200; // ms debounce
 
+    // ——— CSS ———
     const STREMIO_CSS = `
     .stremio-btns {
         margin-left: 6px;
-        display: inline-flex;
-        align-items: center;
+        display: inline-flex !important;
+        align-items: center !important;
     }
     .stremio-btn {
         position: relative;
@@ -34,14 +35,16 @@
         height: 20px;
         margin-right: 4px;
         cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
+        /* Prevent any parent transform from flipping us */
+        transform: none !important;
+        writing-mode: horizontal-tb !important;
     }
     .stremio-btn img {
         display: block;
         width: 100%;
         height: 100%;
+        /* Ensure icon itself isn’t flipped */
+        transform: none !important;
     }
     .stremio-btn span {
         position: absolute;
@@ -54,13 +57,16 @@
         border-radius: 1px;
         pointer-events: none;
         line-height: 1;
+        /* Prevent flips on the text badge */
+        transform: none !important;
+        writing-mode: horizontal-tb !important;
     }
     `;
 
     // ——— INJECT CSS ———
     GM_addStyle(STREMIO_CSS);
 
-    // ——— FIND IMDB LINKS ———
+    // ——— FIND IMDb LINKS ———
     function findIMDbLinks() {
         return Array.from(
             document.querySelectorAll('a[href*="imdb.com/title/tt"]'),
@@ -95,6 +101,7 @@
     // ——— ADD BUTTONS ———
     function addButtons() {
         for (const link of findIMDbLinks()) {
+            // skip if already has our container
             if (link.parentElement.querySelector('.stremio-btns')) continue;
 
             const [, imdbId] = link.href.match(IMDB_URL_RX);
@@ -117,19 +124,20 @@
                 ),
             );
 
+            // insert right after the <h3> (or the link itself)
             const target = link.querySelector('h3') || link;
             target.parentElement.insertBefore(container, target.nextSibling);
         }
     }
 
-    // ——— DEBOUNCE ———
+    // ——— DEBOUNCE UTIL ———
     let timer;
     function debounced(fn, delay = OBSERVE_DELAY) {
         clearTimeout(timer);
         timer = setTimeout(fn, delay);
     }
 
-    // ——— OBSERVE & INIT ———
+    // ——— OBSERVE & INITIALIZE ———
     new MutationObserver(() => debounced(addButtons)).observe(document, {
         childList: true,
         subtree: true,
