@@ -8,7 +8,7 @@ To ensure proper emoji support, install the following font on your system:
 
 - [Noto Color Emoji](https://fonts.google.com/noto/specimen/Noto+Color+Emoji)
 
-### **📥 Install**
+### **📥 Install from GitHub**
 
 To install the script, click [here](https://raw.githubusercontent.com/sinazadeh/userscripts/refs/heads/main/Emoji_Font_Override.user.js).
 

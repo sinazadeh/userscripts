@@ -1,9 +1,10 @@
 ## 🛡 Reddit Tab Icons & Title Prefix
+
 *Forked from [rybak/subreddit-tab-icons](https://github.com/rybak/subreddit-tab-icons)*
 
 Adds subreddit icons to Reddit tabs and prefixes the tab title with `r/SubredditName` for easier tab identification and navigation.
 
-### **📥 Install**
+### **📥 Install from GitHub**
 
 To install the script, click [here](https://raw.githubusercontent.com/sinazadeh/userscripts/refs/heads/main/Reddit_Tab_Icons_Title_Prefix.user.js).
 

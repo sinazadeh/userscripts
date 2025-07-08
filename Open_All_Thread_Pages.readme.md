@@ -2,7 +2,7 @@
 
 Adds a convenient "Open All" button to forum threads, allowing you to load every page into a new tab with a single click.
 
-### **📥 Install**
+### **📥 Install from GitHub**
 
 To install the script, click [here](https://raw.githubusercontent.com/sinazadeh/userscripts/refs/heads/main/Open_All_Thread_Pages.user.js).
 

@@ -2,7 +2,7 @@
 
 Automatically replaces blurry Reddit image previews with their full-resolution originals as you scroll. Includes a menu command to toggle the feature on or off.
 
-### **📥 Install**
+### **📥 Install from GitHub**
 
 To install the script, click [here](https://raw.githubusercontent.com/sinazadeh/userscripts/refs/heads/main/Always_Load_HD_Reddit_Images.user.js).
 

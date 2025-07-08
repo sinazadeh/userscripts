@@ -2,7 +2,7 @@
 
 Enhances Letterboxd film pages by replacing IMDb/TMDb text links with icons and adding direct "Watch on Stremio" badges.
 
-### **📥 Install**
+### **📥 Install from GitHub**
 
 To install the script, click [here](https://raw.githubusercontent.com/sinazadeh/userscripts/refs/heads/main/Letterboxd_Link_Badges.user.js).
 
