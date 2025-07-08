@@ -2,7 +2,8 @@
 
 *Forked from [rybak/subreddit-tab-icons](https://github.com/rybak/subreddit-tab-icons)*
 
-![image](https://github.com/user-attachments/assets/f05f086d-d866-4fee-94cd-da0d702bc3ae)
+![Untitled](https://github.com/user-attachments/assets/5c1d4f50-45f4-4ee2-a3ee-08fd4acbc5a1)
+
 
 Adds subreddit icons to Reddit tabs and prefixes the tab title with `r/SubredditName` for easier tab identification and navigation.
 
