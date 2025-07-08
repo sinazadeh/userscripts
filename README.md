@@ -82,6 +82,23 @@ To install the script, click [here](https://raw.githubusercontent.com/sinazadeh/
 
 ---
 
+## 🔍 Google Search: Stremio Links
+
+Adds convenient "Watch on Stremio" buttons (App & Web) next to IMDb links in Google search results.
+
+### **📥 Install**
+
+To install the script, click [here](https://raw.githubusercontent.com/sinazadeh/userscripts/refs/heads/main/Google_Search_Stremio_Links.user.js).
+
+### **✨ Features**
+
+- Adds "Open in Stremio App" and "Open in Stremio Web" buttons next to IMDb links.
+- Works on Google search results pages.
+- Dynamically adds buttons to new results loaded via infinite scroll.
+
+
+---
+
 ## 🎬 Letterboxd Link Badges
 
 Enhances Letterboxd film pages by replacing IMDb/TMDb text links with icons and adding direct "Watch on Stremio" badges.
