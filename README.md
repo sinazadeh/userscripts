@@ -54,23 +54,6 @@ Check out [Emojipedia’s Unicode 16.0 overview](https://emojipedia.org/unicode-
 
 ---
 
-## 🔤 Persian Font Fix (Vazir)
-
-Improves the readability of Persian and RTL content by applying the **Vazir** font across supported websites.
-
-### **🛠 Prerequisites**
-
-To ensure proper rendering, install the following fonts on your system:
-
-- [Vazirmatn](https://fonts.google.com/specimen/Vazirmatn)
-- [Noto Sans](https://fonts.google.com/noto/specimen/Noto+Sans)
-
-### **📥 Install**
-
-To install the script, click [here](https://raw.githubusercontent.com/sinazadeh/userscripts/refs/heads/main/Persian_Font_Fix_Vazir.user.js).
-
----
-
 ## ↪️ Bypass Link Redirects
 
 Automatically bypasses intermediate confirmation, warning, and interstitial pages on supported websites, taking you directly to the destination link.
@@ -80,6 +63,24 @@ Automatically bypasses intermediate confirmation, warning, and interstitial page
 To install the script, click [here](https://raw.githubusercontent.com/sinazadeh/userscripts/refs/heads/main/Bypass_Link_Redirects.user.js).
 
 ---
+
+## 🖼️ Always Load HD Reddit Images
+
+Automatically replaces blurry Reddit image previews with their full-resolution originals as you scroll. Includes a menu command to toggle the feature on or off.
+
+### **📥 Install**
+
+To install the script, click [here](https://raw.githubusercontent.com/sinazadeh/userscripts/refs/heads/main/Always_Load_HD_Reddit_Images.user.js).
+
+### **✨ Features**
+
+-   Replaces low-resolution `preview.redd.it` images with high-resolution `i.redd.it` versions.
+-   Works on both `<img>` tags and elements with `background-image`.
+-   Uses `IntersectionObserver` for efficient, on-demand loading as you scroll.
+-   Includes a Tampermonkey menu command to easily enable or disable the functionality.
+-   Dynamically handles new images loaded via infinite scroll.
+
+--- 
 
 ## 📖 Open All Thread Pages
 
@@ -94,3 +95,20 @@ To install the script, click [here](https://raw.githubusercontent.com/sinazadeh/
 - Adds an "Open All" button next to the page navigation on forum threads.
 - Opens all pages of the current thread into new tabs, from last to first.
 - Includes a safety confirmation for opening a large number of tabs (over 50).
+
+---
+
+## 🔤 Persian Font Fix (Vazir)
+
+Improves the readability of Persian and RTL content by applying the **Vazir** font across supported websites.
+
+### **🛠 Prerequisites**
+
+To ensure proper rendering, install the following fonts on your system:
+
+- [Vazirmatn](https://fonts.google.com/specimen/Vazirmatn)
+- [Noto Sans](https://fonts.google.com/noto/specimen/Noto+Sans)
+
+### **📥 Install**
+
+To install the script, click [here](https://raw.githubusercontent.com/sinazadeh/userscripts/refs/heads/main/Persian_Font_Fix_Vazir.user.js).
