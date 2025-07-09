@@ -6,7 +6,7 @@
   "plugins": ["prettier"],
   "extends": ["prettier"],
   "parserOptions": {
-    "ecmaVersion": 9,
+    "ecmaVersion": 11,
     "sourceType": "module",
     "ecmaFeatures": {
       "jsx": true
