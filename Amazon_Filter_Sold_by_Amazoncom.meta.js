@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Amazon Filter: Sold by Amazon.com
 // @namespace    https://github.com/sinazadeh/userscripts
-// @version      2.0.1
+// @version      2.1.0
 // @description  Enhances Amazon's sidebar by adding direct filters for items sold by Amazon.com and other Amazon-owned sellers.
 // @author       TheSina
 // @match        *://www.amazon.com/s*
