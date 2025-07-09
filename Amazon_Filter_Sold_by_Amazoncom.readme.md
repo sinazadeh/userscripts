@@ -1,6 +1,6 @@
 # 🛍️ Amazon Filter: Sold by Amazon.com
 
-A lightweight userscript that adds a persistent dropdown filter to Amazon search and category pages — making it easier to view items sold by Amazon.com or other Amazon-owned sellers.
+A lightweight userscript that enhances Amazon's filtering capabilities, making it easier to view items sold directly by Amazon.com or other Amazon-owned entities.
 
 ## **📥 Install from GitHub**
 
@@ -10,28 +10,17 @@ To install the script, click [here](https://raw.githubusercontent.com/sinazadeh/
 
 ## ✨ Features
 
-- **Simple Filtering UI**  
-  Adds a clean dropdown menu at the bottom-center of the page for quick seller selection.
+- **Seamless UI Integration**
+  Adds custom Amazon seller options directly into the native "Seller" filter list in the sidebar. No more floating menus!
+- **Prominent Placement**
+  Automatically moves the entire "Seller" filter block to the top of the sidebar for quick and easy access.
+- **Granular Seller Filtering**
+  Allows you to multi-select from a list of Amazon-owned sellers:
 
-- **Seller Filter Options**  
-  Easily toggle between:
-  - `All Sellers` — Show all listings (default)
-  - `Amazon.com` — Filter for items sold by Amazon.com (ATVPDKIKX0DER) or Amazon.com Services LLC (A3ODHND3J0WMC8)
-  - `All Amazon` — Includes all Amazon-owned sellers:
-    - Amazon.com (ATVPDKIKX0DER)  
-    - Amazon.com Services LLC (A3ODHND3J0WMC8)  
-    - Amazon (A2Q1LRYTXHYQ2K)  
-    - Amazon Resale (A2L77EE7U53NWQ)
-
-- **Persistent Selection**  
-  Your filter choice is saved locally and reapplied automatically on future visits.
-
-- **Works Across Pages**  
-  Compatible with:
-  - Amazon search results (`/s`)
-  - Category and browse pages (`/b`)
-
----
+  - `Amazon` (A2Q1LRYTXHYQ2K)
+  - `Amazon.com` (ATVPDKIKX0DER)
+  - `Amazon Resale` (A2L77EE7U53NWQ)
+  - `Amazon.com Services LLC` (A3ODHND3J0WMC8)
 
 ## ⚖️ License
 
