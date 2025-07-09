@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Amazon Filter: Sold by Amazon.com
 // @namespace    https://github.com/sinazadeh/userscripts
-// @version      2.0.1
+// @version      2.1.0
 // @description  Enhances Amazon's sidebar by adding direct filters for items sold by Amazon.com and other Amazon-owned sellers.
 // @author       TheSina
 // @match        *://www.amazon.com/s*
@@ -13,6 +13,7 @@
 // @downloadURL  https://raw.githubusercontent.com/sinazadeh/userscripts/refs/heads/main/Amazon_Filter_Sold_by_Amazoncom.user.js
 // @updateURL    https://raw.githubusercontent.com/sinazadeh/userscripts/refs/heads/main/Amazon_Filter_Sold_by_Amazoncom.meta.js
 // ==/UserScript==
+/* jshint esversion: 8 */
 /* jshint esversion: 8 */
 (function () {
     'use strict';
@@ -43,6 +44,86 @@
         'Amazon.com Services LLC': 'A3ODHND3J0WMC8',
     };
 
+    function isOnCategoryPage() {
+        return location.pathname.includes('/b/');
+    }
+
+    function getCategoryPageData() {
+        const url = new URL(location.href);
+        const node = url.searchParams.get('node');
+
+        // Try to extract category name from various sources
+        let categoryName = '';
+
+        // First try to get from search results breadcrumb (most reliable)
+        const breadcrumbSpan = document.querySelector(
+            '.sg-col .a-color-state.a-text-bold',
+        );
+        if (breadcrumbSpan) {
+            categoryName = breadcrumbSpan.textContent.trim().replace(/"/g, '');
+        }
+
+        // If not found, try navigation breadcrumbs
+        if (!categoryName) {
+            const breadcrumbs = document.querySelector(
+                '#wayfinding-breadcrumbs_feature_div',
+            );
+            if (breadcrumbs) {
+                const links = breadcrumbs.querySelectorAll('a');
+                if (links.length > 0) {
+                    categoryName = links[links.length - 1].textContent.trim();
+                }
+            }
+        }
+
+        // If still not found, try page title but clean it properly
+        if (!categoryName) {
+            const title = document.title;
+            if (title && title.includes('Amazon.com')) {
+                categoryName = title
+                    .split(' - ')[0]
+                    .replace('Amazon.com: ', '')
+                    .trim();
+            }
+        }
+
+        // If still not found, try the main heading
+        if (!categoryName) {
+            const heading = document.querySelector(
+                'h1, .a-size-large.a-spacing-none.a-color-base',
+            );
+            if (heading) {
+                categoryName = heading.textContent.trim();
+            }
+        }
+
+        return {
+            node: node,
+            categoryName: categoryName || 'Category',
+        };
+    }
+
+    function buildSearchUrlFromCategory() {
+        const categoryData = getCategoryPageData();
+        const baseUrl = 'https://www.amazon.com/s';
+        const params = new URLSearchParams();
+
+        // Add keywords based on category name (use 'k' parameter like Amazon does)
+        if (categoryData.categoryName) {
+            params.set('k', categoryData.categoryName);
+        }
+
+        // Add node filter if available
+        if (categoryData.node) {
+            params.set('rh', `n:${categoryData.node}`);
+        }
+
+        // Add minimal necessary parameters
+        params.set('ref', 'sr_nr_p_6_2');
+
+        return `${baseUrl}?${params.toString()}`;
+    }
+
     function initializeStateFromURL() {
         const url = new URL(location.href);
         const rh = url.searchParams.get('rh') || '';
@@ -61,6 +142,30 @@
     }
 
     function applyFilter() {
+        // If we're on a category page, convert to search URL first
+        if (isOnCategoryPage()) {
+            const searchUrl = buildSearchUrlFromCategory();
+            const url = new URL(searchUrl);
+
+            // Add seller filter if any are selected
+            if (selectedFilters.length > 0) {
+                const existingRh = url.searchParams.get('rh') || '';
+                const rhParts = existingRh
+                    .split(',')
+                    .filter(p => p && !p.startsWith('p_6:'));
+
+                const pipeList = selectedFilters
+                    .map(label => ID_MAP[label])
+                    .join('%7C');
+                rhParts.push('p_6:' + pipeList);
+                url.searchParams.set('rh', rhParts.join(','));
+            }
+
+            window.location.href = url.toString();
+            return;
+        }
+
+        // Original logic for search pages
         const originalHref = location.href;
         const url = new URL(originalHref);
         const sp = url.searchParams;
@@ -124,10 +229,89 @@
         });
     }
 
+    function createCategoryPageUI() {
+        // For category pages, create a floating widget or inject into existing sidebar
+        const existingSidebar = document.querySelector(
+            '#leftNav, .s-refinements, .a-section.a-spacing-none',
+        );
+
+        if (!existingSidebar) {
+            // Create a floating widget if no sidebar exists
+            const widget = document.createElement('div');
+            widget.id = 'amazon-seller-filter-widget';
+            widget.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: white;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                padding: 15px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                z-index: 1000;
+                max-width: 250px;
+                font-family: Arial, sans-serif;
+                font-size: 13px;
+            `;
+
+            const title = document.createElement('h3');
+            title.textContent = 'Filter by Seller';
+            title.style.cssText =
+                'margin: 0 0 10px 0; font-size: 14px; font-weight: bold;';
+            widget.appendChild(title);
+
+            const ul = document.createElement('ul');
+            ul.style.cssText = 'list-style: none; padding: 0; margin: 0;';
+            ul.id = 'category-seller-filter';
+
+            OPTIONS.forEach(label => {
+                const li = document.createElement('li');
+                li.style.cssText = 'margin: 5px 0;';
+
+                const checkboxId = `category-${ID_MAP[label]}`;
+                li.innerHTML = `
+                    <label style="display: flex; align-items: center; cursor: pointer;">
+                        <input type="checkbox" id="${checkboxId}" style="margin-right: 8px;">
+                        <span>${label}</span>
+                    </label>
+                `;
+
+                const checkbox = li.querySelector('input');
+                checkbox.addEventListener('change', () => {
+                    toggleOption(label);
+                });
+
+                ul.appendChild(li);
+            });
+
+            widget.appendChild(ul);
+            document.body.appendChild(widget);
+
+            // Update checkboxes for category page
+            OPTIONS.forEach(label => {
+                const checkboxId = `category-${ID_MAP[label]}`;
+                const checkbox = document.getElementById(checkboxId);
+                if (checkbox) {
+                    checkbox.checked = selectedFilters.includes(label);
+                }
+            });
+
+            return;
+        }
+
+        // If sidebar exists, try to inject into it
+        buildNativeUI();
+    }
+
     function buildNativeUI() {
         const ul = document.getElementById('filter-p_6');
         if (!ul) {
-            // If the filter container doesn't exist yet, try again later
+            // If we're on a category page and no filter container exists, create custom UI
+            if (isOnCategoryPage()) {
+                createCategoryPageUI();
+                return;
+            }
+            // Otherwise, try again later
             setTimeout(buildNativeUI, 300);
             return;
         }
@@ -191,10 +375,23 @@
         if (currentUrl !== location.href) {
             currentUrl = location.href;
             isInitialized = false;
+
+            // Clean up any existing category widget
+            const existingWidget = document.getElementById(
+                'amazon-seller-filter-widget',
+            );
+            if (existingWidget) {
+                existingWidget.remove();
+            }
+
             initializeStateFromURL();
             // Wait a bit for the new page content to load
             setTimeout(() => {
-                buildNativeUI();
+                if (isOnCategoryPage()) {
+                    createCategoryPageUI();
+                } else {
+                    buildNativeUI();
+                }
             }, 500);
         }
     }
@@ -246,7 +443,13 @@
 
     function initialize() {
         initializeStateFromURL();
-        buildNativeUI();
+
+        if (isOnCategoryPage()) {
+            createCategoryPageUI();
+        } else {
+            buildNativeUI();
+        }
+
         setupMutationObserver();
 
         // Also check for URL changes periodically as a fallback
