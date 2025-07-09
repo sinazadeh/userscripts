@@ -10,17 +10,26 @@ To install the script, click [here](https://raw.githubusercontent.com/sinazadeh/
 
 ## ✨ Features
 
-- **Easy Filtering UI** Adds a user-friendly dropdown at the bottom-center of the page.
-- **Seller Options**
+- **Simple Filtering UI**  
+  Adds a clean dropdown menu at the bottom-center of the page for quick seller selection.
 
-  - `All Sellers` – Show all listings (default behavior)
-  - `Amazon.com` – Only show items sold by Amazon.com (ATVPDKIKX0DER) or Amazon.com Services LLC (A3ODHND3J0WMC8)
-  - `All Amazon` – Include Amazon-owned sellers: Amazon.com (ATVPDKIKX0DER), Amazon.com Services LLC (A3ODHND3J0WMC8), Amazon (A2Q1LRYTXHYQ2K), and Amazon Resale (A2L77EE7U53NWQ)
-- **Persistent Settings** Your selection is remembered and auto-applied on future visits.
-- **Page Compatibility** Works on both:
+- **Seller Filter Options**  
+  Easily toggle between:
+  - `All Sellers` — Show all listings (default)
+  - `Amazon.com` — Filter for items sold by Amazon.com (ATVPDKIKX0DER) or Amazon.com Services LLC (A3ODHND3J0WMC8)
+  - `All Amazon` — Includes all Amazon-owned sellers:
+    - Amazon.com (ATVPDKIKX0DER)  
+    - Amazon.com Services LLC (A3ODHND3J0WMC8)  
+    - Amazon (A2Q1LRYTXHYQ2K)  
+    - Amazon Resale (A2L77EE7U53NWQ)
 
-  - Search result pages (`/s`)
-  - Category/browse pages (`/b`)
+- **Persistent Selection**  
+  Your filter choice is saved locally and reapplied automatically on future visits.
+
+- **Works Across Pages**  
+  Compatible with:
+  - Amazon search results (`/s`)
+  - Category and browse pages (`/b`)
 
 ---
 
