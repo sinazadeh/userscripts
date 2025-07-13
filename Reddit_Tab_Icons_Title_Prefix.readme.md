@@ -5,7 +5,7 @@
 ![Untitled](https://github.com/user-attachments/assets/5c1d4f50-45f4-4ee2-a3ee-08fd4acbc5a1)
 
 
-Adds subreddit icons to Reddit tabs and prefixes the tab title with `r/SubredditName` for easier tab identification and navigation.
+Adds subreddit icons to Reddit tabs and prefixes the tab title with the subreddit name (e.g., `r/SubredditName`) for easier tab identification and navigation.
 
 ## **📥 Install from GitHub**
 

@@ -1,5 +1,7 @@
 # 🛍️ Amazon Filter: Sold by Amazon.com
 
+![image](https://github.com/user-attachments/assets/304efad9-e3cb-4c75-89b0-018630fbbf26)
+
 A lightweight userscript that enhances Amazon's filtering capabilities, making it easier to view items sold directly by Amazon.com or other Amazon-owned entities.
 
 ## **📥 Install from GitHub**
