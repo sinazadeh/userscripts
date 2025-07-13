@@ -13,7 +13,7 @@
 // @downloadURL  https://raw.githubusercontent.com/sinazadeh/userscripts/refs/heads/main/Xbox_PriceLens.user.js
 // @updateURL    https://raw.githubusercontent.com/sinazadeh/userscripts/refs/heads/main/Xbox_PriceLens.meta.js
 // ==/UserScript==
-
+/* jshint esversion: 11 */
 (async function () {
     'use strict';
 
@@ -588,23 +588,33 @@
 
     function updateBannerDisplay(container, lines) {
         const sorted = [...lines]
-            .filter(i => Prefs.visible[i.code])
-            .sort((a, b) =>
-                Prefs.sortOrder === 'alpha'
-                    ? a.name.localeCompare(b.name)
-                    : a.convertedPrice - b.convertedPrice,
-            );
+            .filter(item => Prefs.visible[item.code])
+            .sort((a, b) => {
+                // avoid the “line break before ‘?’” warning by using an if/else
+                if (Prefs.sortOrder === 'alpha') {
+                    return a.name.localeCompare(b.name);
+                }
+                return a.convertedPrice - b.convertedPrice;
+            });
+
         container.innerHTML = '';
+
         if (sorted.length === 0) {
             container.innerHTML = `<div class="xbox-row">No currencies selected.</div>`;
             return;
         }
+
         sorted.forEach(item => {
             const row = document.createElement('div');
             row.className = 'xbox-row';
-            if (item.error) row.classList.add('error');
-            if (item.code === Prefs.defaultStore)
+
+            if (item.error) {
+                row.classList.add('error');
+            }
+            if (item.code === Prefs.defaultStore) {
                 row.classList.add('default-store-highlight');
+            }
+
             row.innerHTML = item.html;
             container.appendChild(row);
         });
