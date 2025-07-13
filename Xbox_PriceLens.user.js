@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Xbox PriceLens
 // @namespace    https://github.com/sinazadeh/userscripts
-// @version      1.0.2
+// @version      1.0.3
 // @description  Get a clear view of global Xbox pricing. PriceLens adds a powerful, customizable dashboard to game pages, showing you what a game costs in different countries—all in your home currency. Pin your favorite stores and let PriceLens help you focus on the best deals.
 // @author       TheSina
 // @match        *://www.xbox.com/*/games/store/*
@@ -39,46 +39,260 @@
     function injectStyles() {
         const style = document.createElement('style');
         style.textContent = `
-            .xbox-banner { position: relative; background: #fff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin: 16px 0; padding: 12px 16px; font: 0.95rem/1.4 system-ui, sans-serif; color: #333; min-height: 50px; }
-            .xbox-rows { display: flex; flex-wrap: wrap; gap: 8px; align-content: flex-start; }
-            .xbox-row { flex: 1 1 calc(50% - 8px); background: #f9f9f9; padding: 8px; border-radius: 4px; direction: ltr; text-align: left; border-left: 3px solid transparent; transition: background-color 0.2s, border-color 0.2s; }
-            .xbox-row.default-store-highlight { background-color: #e6ffed; border-left-color: #4caf50; }
-            .xbox-row.error { color: #d32f2f; }
-            .xbox-row.loading { width: 100%; display: flex; justify-content: center; align-items: center; color: #888; background: none; }
-            .xbox-row .error-text { color: currentColor; }
-            .rtl-text { direction: rtl; unicode-bidi: embed; display: inline-block; }
-            .xbox-settings-btn { position: absolute; bottom: 8px; right: 8px; background: none; border: none; cursor: pointer; color: currentColor; padding: 4px; font-size: 1.2rem; z-index: 1; }
-            .xbox-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s; z-index: 9999; }
-            .xbox-overlay.show { opacity: 1; }
-            .xbox-modal { background: #fff; color: #000; padding: 20px; border-radius: 8px; width: 500px; max-width: 95%; font: 1rem/1.4 system-ui, sans-serif; }
-            .xbox-modal h3 { margin: 0 0 16px; }
-            .xbox-modal h4 { margin: 16px 0 8px; }
-            .stores-list { column-count: 2; column-gap: 20px; }
-            .xbox-modal-section { margin-bottom: 16px; }
-            .xbox-modal-section select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
-            .xbox-modal-actions { text-align: right; margin-top: 24px; }
-            .xbox-modal-actions-links { margin-bottom: 16px; }
-            .xbox-modal-actions-links a { margin-right: 12px; cursor: pointer; }
-            .xbox-modal-actions button:not(:last-child) { margin-right: 8px; }
-            .switch { display: flex; align-items: center; margin: 6px 0; cursor: pointer; break-inside: avoid-column; }
-            .switch input { opacity: 0; width: 1px; height: 1px; }
-            .switch .slider { width: 36px; height: 18px; background: #ccc; border-radius: 9px; margin-right: 10px; position: relative; transition: background 0.2s; }
-            .switch .slider::after { content: ""; position: absolute; width: 16px; height: 16px; top: 1px; left: 1px; background: #fff; border-radius: 50%; transition: transform 0.2s; }
-            .switch input:checked + .slider { background: #4caf50; }
-            .switch input:checked + .slider::after { transform: translateX(18px); }
-            .switch input:focus-visible + .slider { box-shadow: 0 0 0 2px #0078d4; }
-            @media (max-width: 420px) { .stores-list { column-count: 1; } }
-            @media (prefers-color-scheme: dark) {
-                .xbox-banner { background: #1e1e1e; color: #ddd; }
-                .xbox-row { background: #2a2a2a; }
-                .xbox-row.default-store-highlight { background-color: #1a3d20; border-left-color: #66bb6a; }
-                .xbox-row.loading { color: #666; }
-                .xbox-row.error { color: #ef5350; }
-                .xbox-modal { background: #2a2a2a; color: #ccc; }
-                .xbox-modal-section select { background: #333; color: #ccc; border-color: #555; }
-                .xbox-settings-btn { color: #fff; }
+        @font-face {
+            font-family: 'Noto Color Emoji';
+            src: local('Noto Color Emoji');
+        }
+
+        .xbox-banner,
+        .xbox-row,
+        .xbox-modal,
+        .xbox-modal-section,
+        .xbox-settings-btn {
+            font-family:
+                system-ui, 'Noto Color Emoji', 'Apple Color Emoji', 'Segoe UI Emoji',
+                'Segoe UI Symbol', sans-serif;
+        }
+
+        .xbox-banner {
+            position: relative;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin: 16px 0;
+            padding: 12px 16px;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            color: #333;
+            min-height: 50px;
+        }
+
+        .xbox-rows {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-content: flex-start;
+        }
+
+        .xbox-row {
+            flex: 1 1 calc(50% - 8px);
+            background: #f9f9f9;
+            padding: 8px;
+            border-radius: 4px;
+            direction: ltr;
+            text-align: left;
+            border-left: 3px solid transparent;
+            transition:
+                background-color 0.2s,
+                border-color 0.2s;
+        }
+
+        .xbox-row.default-store-highlight {
+            background-color: #e6ffed;
+            border-left-color: #4caf50;
+        }
+
+        .xbox-row.error {
+            color: #d32f2f;
+        }
+
+        .xbox-row.loading {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #888;
+            background: none;
+        }
+
+        .xbox-row .error-text {
+            color: currentColor;
+        }
+
+        .rtl-text {
+            direction: rtl;
+            unicode-bidi: embed;
+            display: inline-block;
+        }
+
+        .xbox-settings-btn {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: currentColor;
+            padding: 4px;
+            font-size: 1.2rem;
+            z-index: 1;
+        }
+
+        .xbox-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 9999;
+        }
+
+        .xbox-overlay.show {
+            opacity: 1;
+        }
+
+        .xbox-modal {
+            background: #fff;
+            color: #000;
+            padding: 20px;
+            border-radius: 8px;
+            width: 500px;
+            max-width: 95%;
+            font-size: 1rem;
+            line-height: 1.4;
+        }
+
+        .xbox-modal h3 {
+            margin: 0 0 16px;
+        }
+
+        .xbox-modal h4 {
+            margin: 16px 0 8px;
+        }
+
+        .stores-list {
+            column-count: 2;
+            column-gap: 20px;
+        }
+
+        .xbox-modal-section {
+            margin-bottom: 16px;
+        }
+
+        .xbox-modal-section select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .xbox-modal-actions {
+            text-align: right;
+            margin-top: 24px;
+        }
+
+        .xbox-modal-actions-links {
+            margin-bottom: 16px;
+        }
+
+        .xbox-modal-actions-links a {
+            margin-right: 12px;
+            cursor: pointer;
+        }
+
+        .xbox-modal-actions button:not(:last-child) {
+            margin-right: 8px;
+        }
+
+        .switch {
+            display: flex;
+            align-items: center;
+            margin: 6px 0;
+            cursor: pointer;
+            break-inside: avoid-column;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 1px;
+            height: 1px;
+        }
+
+        .switch .slider {
+            width: 36px;
+            height: 18px;
+            background: #ccc;
+            border-radius: 9px;
+            margin-right: 10px;
+            position: relative;
+            transition: background 0.2s;
+        }
+
+        .switch .slider::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 1px;
+            left: 1px;
+            background: #fff;
+            border-radius: 50%;
+            transition: transform 0.2s;
+        }
+
+        .switch input:checked + .slider {
+            background: #4caf50;
+        }
+
+        .switch input:checked + .slider::after {
+            transform: translateX(18px);
+        }
+
+        .switch input:focus-visible + .slider {
+            box-shadow: 0 0 0 2px #0078d4;
+        }
+
+        @media (max-width: 420px) {
+            .stores-list {
+                column-count: 1;
             }
-        `;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .xbox-banner {
+                background: #1e1e1e;
+                color: #ddd;
+            }
+
+            .xbox-row {
+                background: #2a2a2a;
+            }
+
+            .xbox-row.default-store-highlight {
+                background-color: #1a3d20;
+                border-left-color: #66bb6a;
+            }
+
+            .xbox-row.loading {
+                color: #666;
+            }
+
+            .xbox-row.error {
+                color: #ef5350;
+            }
+
+            .xbox-modal {
+                background: #2a2a2a;
+                color: #ccc;
+            }
+
+            .xbox-modal-section select {
+                background: #333;
+                color: #ccc;
+                border-color: #555;
+            }
+
+            .xbox-settings-btn {
+                color: #fff;
+            }
+        }
+    `;
         document.head.appendChild(style);
     }
 

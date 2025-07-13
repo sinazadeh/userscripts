@@ -8,6 +8,18 @@
 
 Get a clear view of global Xbox pricing. PriceLens adds a powerful, customizable dashboard to game pages, showing you what a game costs in different countries—all in your home currency. Pin your favorite stores and let PriceLens help you focus on the best deals.
 
+## **🛠 Prerequisites**
+
+To ensure proper emoji support, install the following font on your system:
+
+- [Noto Color Emoji](https://fonts.google.com/noto/specimen/Noto+Color+Emoji)
+
+## 📥 Install from GitHub
+
+To install the script, click [here](https://raw.githubusercontent.com/sinazadeh/userscripts/refs/heads/main/Xbox_PriceLens.user.js).
+
+---
+
 ## ✨ Features
 
 -   **Global Price Comparison**: Instantly see game prices from various Xbox stores around the world.
@@ -16,11 +28,6 @@ Get a clear view of global Xbox pricing. PriceLens adds a powerful, customizable
 -   **Default Store**: Set your primary store for the most accurate conversions.
 -   **Seamless Integration**: The dashboard is cleanly integrated into the Xbox game page.
 -   **Light & Dark Mode**: The UI adapts to your system's color scheme.
-
-## 📥 Install from GitHub
-
-To install the script, click [here](https://raw.githubusercontent.com/sinazadeh/userscripts/refs/heads/main/Xbox_PriceLens.user.js).
-
 
 ---
 
