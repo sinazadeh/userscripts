@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Xbox PriceLens
 // @namespace    https://github.com/sinazadeh/userscripts
-// @version      1.0.3
+// @version      1.0.4
 // @description  Get a clear view of global Xbox pricing. PriceLens adds a powerful, customizable dashboard to game pages, showing you what a game costs in different countries—all in your home currency. Pin your favorite stores and let PriceLens help you focus on the best deals.
 // @author       TheSina
 // @match        *://www.xbox.com/*/games/store/*
