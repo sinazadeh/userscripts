@@ -1,4 +1,7 @@
 # 🔭 Xbox PriceLens
+
+*Inspired by [Xbox-Now](https://www.xbox-now.com)*
+
 <img width="1398" height="712" alt="image" src="https://github.com/user-attachments/assets/0a187c6a-ffa4-44de-9e06-02b9837a4fd7" />
 
 <img width="499" height="772" alt="image" src="https://github.com/user-attachments/assets/8fe5c53a-5e78-466c-a84d-988625b257b3" />
