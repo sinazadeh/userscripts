@@ -1,4 +1,7 @@
 # 🔭 Xbox PriceLens
+<img width="1398" height="712" alt="image" src="https://github.com/user-attachments/assets/0a187c6a-ffa4-44de-9e06-02b9837a4fd7" />
+
+<img width="499" height="772" alt="image" src="https://github.com/user-attachments/assets/8fe5c53a-5e78-466c-a84d-988625b257b3" />
 
 Get a clear view of global Xbox pricing. PriceLens adds a powerful, customizable dashboard to game pages, showing you what a game costs in different countries—all in your home currency. Pin your favorite stores and let PriceLens help you focus on the best deals.
 
