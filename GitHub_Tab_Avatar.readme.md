@@ -1,4 +1,5 @@
 # 📷 GitHub Tab Avatar
+<img width="164" height="59" alt="image" src="https://github.com/user-attachments/assets/1fb3efcb-33fe-4962-bf0a-5411f3ee5871" />
 
 Replaces the default GitHub favicon with the repository's avatar, making it easier to distinguish between different repo tabs in your browser.
 
