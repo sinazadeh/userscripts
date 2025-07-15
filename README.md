@@ -6,6 +6,7 @@ A curated collection of userscripts designed to enhance your browsing experience
 
 - [🔭 Xbox PriceLens](Xbox_PriceLens.readme.md)
 - [🛡️ Reddit Tab Icons &amp; Title Prefix](Reddit_Tab_Icons_Title_Prefix.readme.md)
+- [📷 GitHub Tab Avatar](GitHub_Tab_Avatar.readme.md)
 - [🛍️ Amazon Filter: Sold by Amazon.com](Amazon_Filter_Sold_by_Amazoncom.readme.md)
 - [😀 Emoji Font Override](Emoji_Font_Override.readme.md)
 - [↪️ Bypass Link Redirects](Bypass_Link_Redirects.readme.md)
