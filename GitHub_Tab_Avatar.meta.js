@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GitHub Tab Avatar
 // @namespace    https://github.com/sinazadeh/userscripts
-// @version      1.0.0
+// @version      1.0.1
 // @description  Use each GitHub repository’s avatar as the browser tab icon.
 // @author       TheSina
 // @match        *://github.com/*/*
