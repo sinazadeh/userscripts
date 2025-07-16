@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GitHub Tab Avatar
 // @namespace    https://github.com/sinazadeh/userscripts
-// @version      1.0.1
+// @version      1.0.2
 // @description  Use each GitHub repository’s avatar as the browser tab icon.
 // @author       TheSina
 // @match        *://github.com/*/*
@@ -15,13 +15,25 @@
     'use strict';
 
     const CACHE_TTL = 24 * 3600 * 1000;
+    const STORAGE_KEY = 'githubTabAvatarCache';
     const DEBUG = false;
     const LOG = (...args) => DEBUG && console.log('[GTU]', ...args);
 
     let iconEls = [];
     let originalIcon = null;
-    let lastOwner = null; // Changed from lastRepoKey to lastOwner for better logic
-    const iconCache = new Map();
+    let lastOwner = null;
+    // load cache from localStorage
+    let iconCache = new Map();
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+            JSON.parse(raw).forEach(([owner, entry]) => {
+                if (Date.now() - entry.ts < CACHE_TTL) {
+                    iconCache.set(owner, entry);
+                }
+            });
+        }
+    } catch {}
     let isUpdating = false;
 
     function getOwnerName() {
@@ -88,6 +100,7 @@
         }
     }
 
+    // try DOM first (new method)
     async function getAvatarFromAPI(owner) {
         try {
             LOG('🚀 Using GitHub API to find avatar for:', owner);
@@ -110,7 +123,6 @@
     async function updateFavicon() {
         if (isUpdating) return;
         isUpdating = true;
-
         try {
             const owner = getOwnerName();
             if (!owner) {
@@ -118,21 +130,25 @@
                 lastOwner = null;
                 return;
             }
-
+            // cached?
             if (owner === lastOwner && iconCache.has(owner)) {
                 const cached = iconCache.get(owner);
                 if (Date.now() - cached.ts < CACHE_TTL) {
                     setFavicon(cached.url);
-                    isUpdating = false;
                     return;
                 }
             }
             lastOwner = owner;
 
             const avatarUrl = await getAvatarFromAPI(owner);
-
             if (avatarUrl) {
                 iconCache.set(owner, {url: avatarUrl, ts: Date.now()});
+                try {
+                    localStorage.setItem(
+                        STORAGE_KEY,
+                        JSON.stringify([...iconCache]),
+                    );
+                } catch {}
                 setFavicon(avatarUrl);
                 LOG('✅ Favicon updated successfully');
             } else {
