@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Persian Font Fix (Vazir)
 // @namespace    https://github.com/sinazadeh/userscripts
-// @version      2.2.2
+// @version      2.2.3
 // @description  Improves the readability of Persian and RTL content by applying the Vazir font across supported websites.
 // @author       TheSina
 // @match       *://*.telegram.org/*
@@ -48,17 +48,11 @@
         [dir="rtl"],
         span[lang^='fa'],
         span[lang^='ar'],
-        [data-font-fix="fa"] {
-            font-family: 'VazirmatnFixed', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
-                'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-                sans-serif;
-        }
-
+        [data-font-fix="fa"],
         /* Specific fix for ChatGPT prompt area */
         #prompt-textarea.ProseMirror {
-            font-family: 'VazirmatnFixed', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
-                'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-                sans-serif !important;
+            font-family: 'VazirmatnFixed', 'Noto Sans', 'Apple Color Emoji', 'Noto Color Emoji',
+            'Twemoji Mozilla', 'Google Sans', 'Helvetica Neue', sans-serif !important;
         }
     `);
 
