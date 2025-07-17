@@ -2,6 +2,9 @@
 
 *An essential toolkit for [xbdeals.net](https://xbdeals.net)*
 
+<img width="667" height="892" alt="image" src="https://github.com/user-attachments/assets/ddb0a14c-e44f-4e08-9b27-df8b0f1c998f" />
+
+
 This userscript enhances your experience on xbdeals.net by converting all regional prices into United States Dollars (USD). It automatically fetches the latest exchange rates and displays the converted price, helping you easily spot the best deals across different stores.
 
 ## 📥 Install from GitHub
