@@ -5,6 +5,7 @@ A curated collection of userscripts designed to enhance your browsing experience
 ## Table of Contents
 
 - [🔭 Xbox PriceLens](Xbox_PriceLens.readme.md)
+- [💰 XBDeals Price Toolkit](XBDeals_Price_Toolkit.readme.md)
 - [🛡️ Reddit Tab Icons &amp; Title Prefix](Reddit_Tab_Icons_Title_Prefix.readme.md)
 - [📷 GitHub Tab Avatar](GitHub_Tab_Avatar.readme.md)
 - [🛍️ Amazon Filter: Sold by Amazon.com](Amazon_Filter_Sold_by_Amazoncom.readme.md)
