@@ -12,7 +12,7 @@
 // @downloadURL  https://raw.githubusercontent.com/sinazadeh/userscripts/refs/heads/main/XBDeals_Price_Toolkit.user.js
 // @updateURL    https://raw.githubusercontent.com/sinazadeh/userscripts/refs/heads/main/XBDeals_Price_Toolkit.meta.js
 // ==/UserScript==
-
+/* jshint esversion: 11 */
 (function () {
     'use strict';
 
