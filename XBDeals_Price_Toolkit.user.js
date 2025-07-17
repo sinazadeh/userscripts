@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         XBDeals Price Toolkit
 // @namespace    https://github.com/sinazadeh/userscripts
-// @version      1.0.1
+// @version      1.0.2
 // @description  The essential toolkit for xbdeals.net. Converts all prices (lists, history, charts) to USD
 // @author       TheSina
 // @match        *://xbdeals.net/*
