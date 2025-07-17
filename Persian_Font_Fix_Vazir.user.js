@@ -38,7 +38,7 @@
     GM_addStyle(`
         @font-face {
             font-family: 'VazirmatnFixed';
-            src: local('Vazirmatn');
+            src: local('Vazirmatn'), url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@master/fonts/webfonts/Vazirmatn-Regular.woff2') format('woff2');
             font-display: swap;
             unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF;
         }
