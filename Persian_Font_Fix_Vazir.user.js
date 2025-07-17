@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Persian Font Fix (Vazir)
 // @namespace    https://github.com/sinazadeh/userscripts
-// @version      2.2.3
+// @version      2.2.4
 // @description  Improves the readability of Persian and RTL content by applying the Vazir font across supported websites.
 // @author       TheSina
 // @match       *://*.telegram.org/*
@@ -36,6 +36,8 @@
 
     // --- Font Style ---
     GM_addStyle(`
+        .font-fix-repaint { opacity: 0.99; }
+
         @font-face {
             font-family: 'VazirmatnFixed';
             src: local('Vazirmatn'), url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@master/fonts/webfonts/Vazirmatn-Regular.woff2') format('woff2');
@@ -239,9 +241,9 @@
     // --- Force Reflow/Repaint ---
     function forceRepaint() {
         document.querySelectorAll('[data-font-fix="fa"]').forEach(el => {
-            el.style.display = 'none'; // Trigger reflow
+            el.classList.add('font-fix-repaint');
             void el.offsetHeight; // Force repaint
-            el.style.display = ''; // Restore display
+            el.classList.remove('font-fix-repaint');
         });
     }
 
