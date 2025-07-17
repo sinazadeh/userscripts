@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Persian Font Fix (Vazir)
 // @namespace    https://github.com/sinazadeh/userscripts
-// @version      2.1.0
+// @version      2.2.0
 // @description  Improves the readability of Persian and RTL content by applying the Vazir font across supported websites.
 // @author       TheSina
 // @match       *://*.telegram.org/*
@@ -22,6 +22,7 @@
 // @match       *://app.slack.com/*
 // @match       *://*.goodreads.com/*
 // @match       *://*.reddit.com/*
+// @match       *://*.linkedin.com/*
 // @exclude      *://*.google.*/recaptcha/*
 // @grant        GM_addStyle
 // @run-at       document-start
@@ -29,59 +30,60 @@
 // @downloadURL  https://raw.githubusercontent.com/sinazadeh/userscripts/refs/heads/main/Persian_Font_Fix_Vazir.user.js
 // @updateURL    https://raw.githubusercontent.com/sinazadeh/userscripts/refs/heads/main/Persian_Font_Fix_Vazir.meta.js
 // ==/UserScript==
-/* jshint esversion: 6 */
-/* global requestIdleCallback */
+/* jshint esversion: 8 */
 (function () {
     'use strict';
 
-    // --- 0. Inject font regardless of performance tweaks ---
+    // --- Font Style ---
     GM_addStyle(`
         @font-face {
             font-family: 'VazirmatnFixed';
             src: local('Vazirmatn');
             font-display: swap;
-            unicode-range:
-                U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF;
+            unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF;
         }
-        body,
-        p,
-        div,
-        h1,
-        h2,
-        h3,
-        h4,
-        h5,
-        h6,
-        a,
-        li,
-        td,
-        th,
-        input[type='text'],
-        input[type='search'],
-        textarea,
-        select,
-        option,
-        label,
-        button,
-        blockquote,
-        summary,
-        details,
-        figcaption,
-        strong,
-        em,
+
+        *:lang(fa),
+        *:lang(ar),
+        [dir="rtl"],
         span[lang^='fa'],
         span[lang^='ar'],
-        span[dir='rtl'] {
-            font-family:
-                'VazirmatnFixed', 'Noto Sans', 'Apple Color Emoji', 'Noto Color Emoji',
-                'Twemoji Mozilla', 'Google Sans', 'Helvetica Neue', sans-serif !important;
+        [data-font-fix="fa"],
+        /* Specific fix for ChatGPT prompt area */
+        #prompt-textarea.ProseMirror {
+            font-family: 'VazirmatnFixed', 'Noto Sans', 'Apple Color Emoji', 'Noto Color Emoji',
+            'Twemoji Mozilla', 'Google Sans', 'Helvetica Neue', sans-serif !important;
         }
-        html {
-            font-size: 16px;
-        }
-        `);
+    `);
 
-    // --- 1. Only look for the two characters we actually replace ---
+    // --- Debounce Utility ---
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    // --- Throttle Utility ---
+    function throttle(func, limit) {
+        let inThrottle;
+        return function () {
+            const args = arguments;
+            const context = this;
+            if (!inThrottle) {
+                func.apply(context, args);
+                inThrottle = true;
+                setTimeout(() => (inThrottle = false), limit);
+            }
+        };
+    }
+
+    // --- Character Fix ---
     const replacementRegex = /[يك]/g;
     const charMap = new Map([
         ['ي', 'ی'],
@@ -91,11 +93,9 @@
     const fixText = text =>
         text.replace(replacementRegex, c => charMap.get(c) || c);
 
-    // --- 2. Fast node‐by‐node replacement, only when needed ---
     const processed = new WeakSet();
     const walkerFilter = {
         acceptNode(node) {
-            // only walk TEXT nodes that contain at least one replaceable char
             return replacementRegex.test(node.nodeValue)
                 ? NodeFilter.FILTER_ACCEPT
                 : NodeFilter.FILTER_SKIP;
@@ -105,12 +105,14 @@
     function fixNode(root) {
         if (processed.has(root) || !replacementRegex.test(root.textContent))
             return;
+
         const walker = document.createTreeWalker(
             root,
             NodeFilter.SHOW_TEXT,
             walkerFilter,
             false,
         );
+
         let node,
             changed = false;
         while ((node = walker.nextNode())) {
@@ -121,10 +123,73 @@
                 changed = true;
             }
         }
+
         if (changed) processed.add(root);
     }
 
-    // --- 3. Input elements: per-element debounce, no full re-scans ---
+    // --- Auto-tag Persian text blocks ---
+    const tagged = new WeakSet(); // Optimization: Avoid re-tagging
+    function tagPersianText(root) {
+        if (tagged.has(root)) return; // Optimization
+
+        const regex = /[\u0600-\u06FF]/;
+        const walker = document.createTreeWalker(
+            root,
+            NodeFilter.SHOW_TEXT,
+            null,
+            false,
+        );
+        let node;
+        while ((node = walker.nextNode())) {
+            const parent = node.parentElement;
+            if (!parent) continue;
+            if (!parent.dataset.fontFix && regex.test(node.nodeValue)) {
+                parent.dataset.fontFix = 'fa';
+            }
+        }
+        tagged.add(root); // Mark as tagged
+    }
+
+    // --- Throttled Processor for Mutations ---
+    const processMutations = throttle(nodes => {
+        for (const node of nodes) {
+            // For element nodes, check content and find inputs
+            if (node.nodeType === 1) {
+                if (/[\u0600-\u06FF]/.test(node.textContent)) {
+                    fixNode(node);
+                    tagPersianText(node);
+                }
+                if (node.tagName === 'INPUT' || node.tagName === 'TEXTAREA') {
+                    attachInput(node);
+                }
+                node.querySelectorAll('input,textarea').forEach(attachInput);
+            }
+            // For text nodes, process their parent
+            else if (node.nodeType === 3 && node.parentElement) {
+                if (/[\u0600-\u06FF]/.test(node.nodeValue)) {
+                    fixNode(node.parentElement);
+                    tagPersianText(node.parentElement);
+                }
+            }
+        }
+        nodes.clear(); // Clear the set for the next batch
+    }, 250); // Process mutations at most every 250ms
+
+    const nodesToProcess = new Set();
+    const obs = new MutationObserver(muts => {
+        for (const m of muts) {
+            if (m.type === 'childList') {
+                m.addedNodes.forEach(n => nodesToProcess.add(n));
+            } else if (m.type === 'characterData') {
+                nodesToProcess.add(m.target);
+            }
+        }
+        if (nodesToProcess.size > 0) {
+            processMutations(nodesToProcess);
+        }
+    });
+
+    // --- Input fix ---
     function attachInput(el) {
         if (el.dataset.pfixAttached) return;
         el.dataset.pfixAttached = '1';
@@ -137,116 +202,119 @@
             const start = el.selectionStart;
             const end = el.selectionEnd;
             el.value = upd;
-
             if (start != null && end != null) {
                 try {
                     el.setSelectionRange(start, end);
-                } catch (err) {
-                    // Ignore
-                }
+                } catch (_) {}
             }
         };
 
-        let to;
         el.addEventListener('input', () => {
-            clearTimeout(to);
-            to = setTimeout(doFix, 50);
+            doFix(); // Immediate fix without debounce
         });
 
-        // Initial fix
         doFix();
     }
 
-    // --- 4. Throttled, targeted MutationObserver ---
-    let pending = new Set(),
-        ticking = false;
-
-    function schedule() {
-        if (ticking) return;
-        ticking = true;
-        // run on idle if available
-        const exec = () => {
-            pending.forEach(node => {
-                if (
-                    node.nodeType === Node.TEXT_NODE ||
-                    node.nodeType === Node.ELEMENT_NODE
-                )
-                    fixNode(node.nodeType === 1 ? node : node.parentElement);
-            });
-            pending.clear();
-            ticking = false;
-        };
-        if ('requestIdleCallback' in window)
-            requestIdleCallback(exec, {
-                timeout: 200,
-            });
-        else setTimeout(exec, 100);
+    // --- Shadow DOM Handling ---
+    function processShadowRoot(shadowRoot) {
+        fixNode(shadowRoot);
+        tagPersianText(shadowRoot);
+        shadowRoot.querySelectorAll('input,textarea').forEach(attachInput);
+        obs.observe(shadowRoot, {
+            childList: true,
+            subtree: true,
+            characterData: true,
+            attributes: false, // Disable attribute monitoring
+        });
     }
 
-    const obs = new MutationObserver(muts => {
-        muts.forEach(m => {
-            if (
-                m.type === 'characterData' &&
-                replacementRegex.test(m.target.nodeValue)
-            ) {
-                pending.add(m.target);
-            }
-            if (m.type === 'childList') {
-                m.addedNodes.forEach(n => {
-                    if (n.nodeType === 3) {
-                        // text node
-                        if (replacementRegex.test(n.nodeValue)) pending.add(n);
-                    } else if (n.nodeType === 1) {
-                        // element
-                        // if it has replaceable text somewhere in subtree
-                        if (replacementRegex.test(n.textContent))
-                            pending.add(n);
-                        // if it’s an <input> or <textarea>, attach
-                        const tag = n.tagName;
-                        if (tag === 'INPUT' || tag === 'TEXTAREA')
-                            attachInput(n);
-                        // also look for any nested inputs
-                        n.querySelectorAll('input,textarea').forEach(
-                            attachInput,
-                        );
-                    }
-                });
-            }
-        });
-        if (pending.size) schedule();
-    });
+    const oldAttachShadow = Element.prototype.attachShadow;
+    Element.prototype.attachShadow = function (options) {
+        const shadowRoot = oldAttachShadow.call(this, options);
+        processShadowRoot(shadowRoot);
+        return shadowRoot;
+    };
 
-    // --- 5. Initialization only after full load, so paint isn’t blocked ---
-    function init() {
-        // 5a. Initial sweep in idle time
-        if ('requestIdleCallback' in window) {
-            requestIdleCallback(() => fixNode(document.body), {
-                timeout: 500,
-            });
-            requestIdleCallback(
-                () => {
-                    document
-                        .querySelectorAll('input,textarea')
-                        .forEach(attachInput);
-                },
-                {
-                    timeout: 500,
+    // --- Force Reflow/Repaint ---
+    function forceRepaint() {
+        document.querySelectorAll('[data-font-fix="fa"]').forEach(el => {
+            el.style.display = 'none'; // Trigger reflow
+            void el.offsetHeight; // Force repaint
+            el.style.display = ''; // Restore display
+        });
+    }
+
+    // --- Viewport Change Handling ---
+    const debouncedHandleViewportChange = debounce(handleViewportChange, 250);
+    function handleViewportChange() {
+        fixNode(document.body);
+        tagPersianText(document.body);
+        forceRepaint();
+    }
+
+    // --- Handle "See More" Click ---
+    function handleSeeMoreClick(event) {
+        const postContainer = event.target.closest(
+            '[data-ad-comet-preview="message"], .x1iorvi4, .x78zum5.xdt5ytf.xz62fqu.x16ldp7u',
+        );
+
+        if (postContainer) {
+            const seeMoreObserver = new MutationObserver(
+                (mutations, observer) => {
+                    for (const mutation of mutations) {
+                        if (mutation.addedNodes.length > 0) {
+                            fixNode(postContainer);
+                            tagPersianText(postContainer);
+                            forceRepaint();
+                            observer.disconnect(); // Clean up the observer
+                            return;
+                        }
+                    }
                 },
             );
-        } else {
-            setTimeout(() => fixNode(document.body), 200);
-            setTimeout(() => {
-                document
-                    .querySelectorAll('input,textarea')
-                    .forEach(attachInput);
-            }, 200);
-        }
 
-        // 5b. Start observing for dynamic content
+            seeMoreObserver.observe(postContainer, {
+                childList: true,
+                subtree: true,
+            });
+        }
+    }
+
+    // --- Init ---
+    function init() {
+        // Initial processing after a delay to let the page settle
+        setTimeout(() => {
+            fixNode(document.body);
+            tagPersianText(document.body);
+            document.querySelectorAll('input,textarea').forEach(attachInput);
+            document.querySelectorAll('*').forEach(el => {
+                if (el.shadowRoot) {
+                    processShadowRoot(el.shadowRoot);
+                }
+            });
+        }, 500);
+
+        // Single observer registration
         obs.observe(document.body, {
             childList: true,
             subtree: true,
             characterData: true,
+            attributes: false, // Keep this false for performance
+        });
+
+        // Add viewport change listeners with throttling
+        window.addEventListener('resize', debouncedHandleViewportChange);
+        window.addEventListener('scroll', debouncedHandleViewportChange);
+
+        // Add "See More" click listener with more specific targeting
+        document.body.addEventListener('click', event => {
+            if (
+                event.target.matches('[role="button"]') &&
+                event.target.textContent.includes('See more')
+            ) {
+                handleSeeMoreClick(event);
+            }
         });
     }
 
