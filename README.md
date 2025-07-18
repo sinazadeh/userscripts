@@ -10,6 +10,7 @@ A curated collection of userscripts designed to enhance your browsing experience
 - [📷 GitHub Tab Avatar](GitHub_Tab_Avatar.readme.md)
 - [🛍️ Amazon Filter: Sold by Amazon.com](Amazon_Filter_Sold_by_Amazoncom.readme.md)
 - [😀 Emoji Font Override](Emoji_Font_Override.readme.md)
+- [✒️ Noto Sans for Google](Noto_Sans_for_Google.readme.md)
 - [↪️ Bypass Link Redirects](Bypass_Link_Redirects.readme.md)
 - [🖼️ Always Load HD Reddit Images](Always_Load_HD_Reddit_Images.readme.md)
 - [🔍 Google Search: Stremio Links](Google_Search_Stremio_Links.readme.md)
