@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Noto Sans for Google
 // @namespace    https://github.com/sinazadeh/userscripts
-// @version      1.0.0
-// @description  Replaces Arial and Roboto with the locally installed Noto Sans font on Google websites.
+// @version      1.0.1
+// @description  Replaces Arial, Roboto, and Open Sans with the locally installed Noto Sans font on Google websites.
 // @author       TheSina
 // @match        *://*.google.*/*
 // @exclude      *://*.google.*/recaptcha/*
