@@ -16,7 +16,7 @@ To install the script, click [here](https://raw.githubusercontent.com/sinazadeh/
 
 ## **🦊 Firefox Tip**
 
-Set the following fonts in settings:
+It is recommended to configure the following font settings in Firefox:
 
 <img width="557" height="575" alt="image" src="https://github.com/user-attachments/assets/804503ee-90c8-4aee-b429-8a82c3612415" />
 <img width="558" height="581" alt="image" src="https://github.com/user-attachments/assets/f7130a10-73a0-49e5-a515-fcc4b5a17c8f" />
