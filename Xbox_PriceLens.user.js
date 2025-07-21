@@ -39,21 +39,24 @@
     function injectStyles() {
         const style = document.createElement('style');
         style.textContent = `
-        @font-face {
-            font-family: 'Noto Color Emoji';
-            src: local('Noto Color Emoji');
-        }
-
         .xbox-banner,
         .xbox-row,
         .xbox-modal,
         .xbox-modal-section,
         .xbox-settings-btn {
-            font-family:
-                system-ui, 'Noto Color Emoji', 'Apple Color Emoji', 'Segoe UI Emoji',
-                'Segoe UI Symbol', sans-serif;
-        }
-
+    font-family:
+        system-ui,
+        'Noto Sans',
+        'Segoe UI',
+        'Noto Color Emoji',
+        'Apple Color Emoji',
+        'Segoe UI Emoji',
+        'Segoe UI Symbol',
+        sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-size: 14px;
+}
         .xbox-banner {
             position: relative;
             background: #fff;
