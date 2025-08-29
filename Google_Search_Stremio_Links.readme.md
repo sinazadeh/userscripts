@@ -1,23 +1,12 @@
 # 🔍 Google Search: Stremio Links
 
-*Forked from [erolcanulutas/Stremio-Movie-Search](https://github.com/erolcanulutas/Stremio-Movie-Search---Firefox)*
+*Forked from [erolcanulutas/Stremio-Movie-Search](https://github.com/erolcanulutas/Stremio-Movie-Search---Firefox) & [stremio-google-search-extension](https://github.com/athuld/stremio-google-search-extension)*
 
-![image](https://github.com/user-attachments/assets/106e9aeb-b649-4096-b3c6-ffc3ad23490f)
-
-
-Adds convenient "Watch on Stremio" buttons (App & Web) next to IMDb links in Google search results.
+Adds "Open in Stremio" buttons to Google search results and knowledge panels for IMDb titles.
 
 ## **📥 Install from GitHub**
 
 To install the script, click [here](https://raw.githubusercontent.com/sinazadeh/userscripts/refs/heads/main/Google_Search_Stremio_Links.user.js).
-
----
-
-## **✨ Features**
-
-- Adds "Open in Stremio App" and "Open in Stremio Web" buttons next to IMDb links.
-- Works on Google search results pages.
-- Dynamically adds buttons to new results loaded via infinite scroll.
 
 ---
 
