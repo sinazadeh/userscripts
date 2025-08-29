@@ -1,6 +1,6 @@
 # 🔍 Google Search: Stremio Links
 
-*Forked from [erolcanulutas/Stremio-Movie-Search](https://github.com/erolcanulutas/Stremio-Movie-Search---Firefox) & [stremio-google-search-extension](https://github.com/athuld/stremio-google-search-extension)*
+*Forked from [erolcanulutas/Stremio-Movie-Search](https://github.com/erolcanulutas/Stremio-Movie-Search---Firefox) & [athuld/stremio-google-search-extension](https://github.com/athuld/stremio-google-search-extension)*
 
 Adds "Open in Stremio" buttons to Google search results and knowledge panels for IMDb titles.
 
