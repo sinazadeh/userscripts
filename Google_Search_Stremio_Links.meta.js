@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Google Search: Stremio Links
 // @namespace    https://github.com/sinazadeh/userscripts
-// @version      1.2.9
-// @description  Adds convenient "Watch on Stremio" buttons (App & Web) next to IMDb links in Google search results.
+// @version      2.0.0
+// @description  Adds "Open in Stremio" buttons to Google search results and knowledge panels for IMDb titles.
 // @author       TheSina
 // @match        *://www.google.*/*
 // @exclude      *://*.google.*/recaptcha/*
