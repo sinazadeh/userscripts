@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Amazon Filter: Sold by Amazon.com
 // @namespace    https://github.com/sinazadeh/userscripts
-// @version      2.2.0
+// @version      2.2.1
 // @description  Enhances Amazon's sidebar by adding direct filters for items sold by Amazon.com and other Amazon-owned sellers.
 // @author       TheSina
 // @match        *://www.amazon.com/s*
@@ -52,9 +52,11 @@
             .filter(p => p && !p.startsWith('p_6:'));
 
         if (state.selectedFilters.length > 0) {
+            // Join with a raw '|': URLSearchParams encodes it to %7C itself,
+            // whereas a pre-encoded '%7C' would be sent as '%257C'.
             const sellerIds = state.selectedFilters
                 .map(label => ID_MAP[label])
-                .join('%7C');
+                .join('|');
             otherRhParams.push(`p_6:${sellerIds}`);
             params.set('rh', otherRhParams.join(','));
         } else {
