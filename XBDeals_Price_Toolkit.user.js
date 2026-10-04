@@ -1,13 +1,14 @@
 // ==UserScript==
 // @name         XBDeals Price Toolkit
 // @namespace    https://github.com/sinazadeh/userscripts
-// @version      1.0.2
+// @version      1.0.3
 // @description  The essential toolkit for xbdeals.net. Converts all prices (lists, history, charts) to USD
 // @author       TheSina
 // @match        *://xbdeals.net/*
 // @grant        GM_xmlhttpRequest
 // @grant        GM_addStyle
 // @connect      cdn.jsdelivr.net
+// @connect      latest.currency-api.pages.dev
 // @license      MIT
 // @downloadURL  https://raw.githubusercontent.com/sinazadeh/userscripts/refs/heads/main/XBDeals_Price_Toolkit.user.js
 // @updateURL    https://raw.githubusercontent.com/sinazadeh/userscripts/refs/heads/main/XBDeals_Price_Toolkit.meta.js
@@ -17,8 +18,10 @@
     'use strict';
 
     // --- Constants and Global State ---
-    const API_URL =
-        'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json';
+    const API_URLS = [
+        'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json',
+        'https://latest.currency-api.pages.dev/v1/currencies/usd.json',
+    ];
     const hiddenStores = ['ae'];
     const currencyMap = {
         ae: 'aed',
@@ -92,20 +95,35 @@
             if (parts.length === 2 && parts[1].length <= 2)
                 cleaned = cleaned.replace(',', '.');
             else cleaned = cleaned.replace(/,/g, '');
+        } else if (cleaned.includes('.')) {
+            // A dot followed by exactly three digits is a thousands
+            // separator (e.g. CLP "$9.999", COP "$45.900"), not a decimal.
+            const parts = cleaned.split('.');
+            if (parts.length > 2 || parts[1].length === 3)
+                cleaned = cleaned.replace(/\./g, '');
         }
         return parseFloat(cleaned);
     }
 
     async function fetchRates() {
         if (ratesCache) return ratesCache;
+        for (const url of API_URLS) {
+            ratesCache = await fetchRatesFrom(url);
+            if (ratesCache) return ratesCache;
+        }
+        return null;
+    }
+
+    function fetchRatesFrom(url) {
         return new Promise(resolve => {
             GM_xmlhttpRequest({
                 method: 'GET',
-                url: API_URL,
+                url,
                 onload: res => {
                     try {
-                        ratesCache = JSON.parse(res.responseText).usd;
-                        resolve(ratesCache);
+                        if (res.status < 200 || res.status >= 300)
+                            throw new Error(`HTTP ${res.status}`);
+                        resolve(JSON.parse(res.responseText).usd || null);
                     } catch (e) {
                         console.error('Error parsing currency data:', e);
                         resolve(null);

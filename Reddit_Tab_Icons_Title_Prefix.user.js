@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Reddit Tab Icons & Title Prefix
 // @namespace https://github.com/sinazadeh/userscripts
-// @version      1.3.6
+// @version      1.3.7
 // @description  Adds subreddit icons to Reddit tabs and prefixes the tab title with r/SubredditName for easier tab identification and navigation.
 // @author       TheSina
 // @match        https://*.reddit.com/*
@@ -20,6 +20,7 @@
     const DEBUG = false;
     const SPECIAL_SUBS = new Set(['all', 'friends', 'popular']);
     const SUBRE_PATH = /^\/r\/([^\/]+)/;
+    const TITLE_PREFIX = /^(?:r\/[^\s/]+ - )+/;
     const CACHE_TTL = 24 * 3600 * 1000; // 24h
     const DEBOUNCE_ICON = 50; // ms
     const DEBOUNCE_TITLE = 50; // ms
@@ -116,6 +117,8 @@
                 d.header_img ||
                 quick;
             iconCache.set(sub, {url, ts: now});
+            // Don't apply a late response after navigating to another sub.
+            if (getSub() !== sub) return;
             setFavicon(url);
             LOG('Fetched icon:', url);
         } catch (e) {
@@ -134,12 +137,10 @@
     // Update the document.title with no gaps
     function updateTitle() {
         const sub = getSub();
-        if (!sub) return;
-        const prefix = `r/${sub} - `;
         const cur = document.title;
-        // strip old prefix if present
-        const raw = cur.startsWith(prefix) ? cur.slice(prefix.length) : cur;
-        const next = prefix + raw;
+        // strip any previous prefix, including one from the sub we just left
+        const raw = cur.replace(TITLE_PREFIX, '');
+        const next = sub ? `r/${sub} - ${raw}` : raw;
         if (cur !== next) {
             document.title = next;
             LOG('Title set to', next);

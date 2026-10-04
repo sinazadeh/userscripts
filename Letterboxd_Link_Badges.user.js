@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Letterboxd Link Badges
 // @namespace    https://github.com/sinazadeh/userscripts
-// @version      1.1.6
+// @version      1.1.7
 // @description  Enhances Letterboxd film pages by replacing IMDb/TMDb text links with icons and adding direct "Watch on Stremio" badges.
 // @author       TheSina
 // @match        https://letterboxd.com/film/*
@@ -52,11 +52,17 @@
         }
     `);
 
-    function createStremioButton(imdbId, type) {
+    function createStremioButton(imdbId, type, contentType) {
         const isApp = type === 'app';
-        const href = isApp
-            ? `stremio://detail/movie/${imdbId}`
-            : `https://web.stremio.com/#/detail/movie/${imdbId}/${imdbId}`;
+        const isSeries = contentType === 'series';
+        let href;
+        if (isApp) {
+            href = `stremio://detail/${contentType}/${imdbId}`;
+        } else if (isSeries) {
+            href = `https://web.stremio.com/#/detail/series/${imdbId}`;
+        } else {
+            href = `https://web.stremio.com/#/detail/movie/${imdbId}/${imdbId}`;
+        }
 
         const link = document.createElement('a');
         link.className = 'micro-button track-event';
@@ -92,6 +98,10 @@
         const imdbIdMatch = imdbLink.href.match(/tt\d+/);
         if (!imdbIdMatch) return;
         const imdbId = imdbIdMatch[0];
+        // Letterboxd also lists TV miniseries; TMDB links those under /tv/.
+        const contentType = /themoviedb\.org\/tv\//.test(tmdbLink.href)
+            ? 'series'
+            : 'movie';
 
         // Replace text with favicons
         const swapFavicon = (link, domain) => {
@@ -104,8 +114,16 @@
         swapFavicon(tmdbLink, 'themoviedb.org');
 
         // Create and inject Stremio buttons
-        const stremioAppButton = createStremioButton(imdbId, 'app');
-        const stremioWebButton = createStremioButton(imdbId, 'web');
+        const stremioAppButton = createStremioButton(
+            imdbId,
+            'app',
+            contentType,
+        );
+        const stremioWebButton = createStremioButton(
+            imdbId,
+            'web',
+            contentType,
+        );
         tmdbLink.after(stremioAppButton, stremioWebButton);
     }
 

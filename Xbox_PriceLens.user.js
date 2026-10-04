@@ -1,11 +1,12 @@
 // ==UserScript==
 // @name         Xbox PriceLens
 // @namespace    https://github.com/sinazadeh/userscripts
-// @version      1.0.4
+// @version      1.1.0
 // @description  Get a clear view of global Xbox pricing. PriceLens adds a powerful, customizable dashboard to game pages, showing you what a game costs in different countries—all in your home currency. Pin your favorite stores and let PriceLens help you focus on the best deals.
 // @author       TheSina
 // @match        *://www.xbox.com/*/games/store/*
 // @connect      cdn.jsdelivr.net
+// @connect      latest.currency-api.pages.dev
 // @grant        GM_xmlhttpRequest
 // @grant        GM_getValue
 // @grant        GM_setValue
@@ -19,14 +20,21 @@
 
     // 1) Centralized Configuration
     const CONFIG = {
+        // Xbox.com uses CSS modules whose class names end in a build hash
+        // (e.g. "Price-module__boldText___+XhBG") that changes on every
+        // deploy, so match on the stable prefix only.
         SELECTORS: {
-            priceText: '.Price-module__boldText___1i2Li',
-            insertionPoint: '.Price-module__priceBaseContainer___j9jGE',
+            priceText: '[class*="Price-module__boldText"]',
+            headerPriceText:
+                '[class*="ProductDetailsHeader-module__"] [class*="Price-module__boldText"]',
+            insertionPoint: '[class*="Price-module__priceBaseContainer"]',
             buyButton: 'button[data-m*="Buy"]',
             banner: '.xbox-banner',
         },
-        API_BASE_URL:
+        API_BASE_URLS: [
             'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/',
+            'https://latest.currency-api.pages.dev/v1/currencies/',
+        ],
         RETRY_DELAY: 750,
         CACHE: {
             KEY_RATES_PREFIX: 'xboxCurrencyRates_v4.2_',
@@ -308,7 +316,9 @@
             flag: '🇦🇷',
             name: 'Argentina Store',
             link: 'Argentina Store',
-            tax: 0.7,
+            // 21% IVA. Impuesto PAIS was repealed in Dec 2024 and the
+            // Ganancias perception on games is 0% since Apr 2025.
+            tax: 0.21,
             decimal: ',',
             fmt: x =>
                 `ARS${new Intl.NumberFormat('es-AR', {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(x).replace(/\s/g, '')}`,
@@ -680,25 +690,39 @@
         const cachedRates = await GM_getValue(cacheKeyRates, null);
         if (cachedRates && now - ts < CONFIG.CACHE.TTL) return cachedRates;
 
+        for (const baseUrl of CONFIG.API_BASE_URLS) {
+            const data = await fetchRatesFrom(
+                `${baseUrl}${baseCurrencyApi}.json`,
+                baseCurrencyApi,
+            );
+            if (data) {
+                await GM_setValue(cacheKeyRates, data);
+                await GM_setValue(cacheKeyTs, now);
+                return data;
+            }
+        }
+        // All sources failed: stale rates are better than no rates.
+        return cachedRates;
+    }
+
+    function fetchRatesFrom(url, baseCurrencyApi) {
         return new Promise(resolve => {
             GM_xmlhttpRequest({
                 method: 'GET',
-                url: `${CONFIG.API_BASE_URL}${baseCurrencyApi}.json`,
-                onload: async r => {
+                url,
+                onload: r => {
                     if (r.status >= 200 && r.status < 300) {
                         try {
-                            const data = JSON.parse(r.responseText)[
-                                baseCurrencyApi
-                            ];
-                            await GM_setValue(cacheKeyRates, data);
-                            await GM_setValue(cacheKeyTs, now);
-                            resolve(data);
+                            resolve(
+                                JSON.parse(r.responseText)[baseCurrencyApi] ||
+                                    null,
+                            );
                         } catch (e) {
                             console.error('API parse failed:', e);
                             resolve(null);
                         }
                     } else {
-                        console.error('API request failed:', r.statusText);
+                        console.error('API request failed:', r.status, url);
                         resolve(null);
                     }
                 },
@@ -710,7 +734,48 @@
         });
     }
 
-    function fetchWithRetry(currency, url, retries = 1) {
+    // Store pages embed their full Redux state as JSON. It carries the exact
+    // numeric price and currency per SKU, which is far more reliable than
+    // scraping (and locale-parsing) the rendered price text.
+    function extractPriceFromState(html, productId, sku) {
+        const match = html.match(
+            /window\.__PRELOADED_STATE__\s*=\s*(\{[^\n]*\})\s*;?\s*$/m,
+        );
+        if (!match) return null;
+        let state;
+        try {
+            state = JSON.parse(match[1]);
+        } catch (e) {
+            return null;
+        }
+        const summaries = state?.core2?.products?.productSummaries;
+        if (!summaries) return null;
+
+        const key = Object.keys(summaries).find(
+            k => k.toUpperCase() === productId.toUpperCase(),
+        );
+        const offers = (
+            summaries[key]?.specificPrices?.purchaseable || []
+        ).filter(p => !sku || p.skuId === sku);
+        // "None" is the public price; others are Game Pass/EA Play member offers.
+        const offer =
+            offers.find(p => p.eligibilityInfo?.eligibility === 'None') ||
+            offers[0];
+        if (!offer || typeof offer.listPrice !== 'number') {
+            return {price: null, currency: null};
+        }
+        return {price: offer.listPrice, currency: offer.currency || null};
+    }
+
+    function extractPriceFromDom(html) {
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        const el =
+            doc.querySelector(CONFIG.SELECTORS.headerPriceText) ||
+            doc.querySelector(CONFIG.SELECTORS.priceText);
+        return el?.textContent.replace(/\+\s*$/, '').trim() || null;
+    }
+
+    function fetchWithRetry(currency, url, productId, sku, retries = 1) {
         return new Promise(resolve => {
             GM_xmlhttpRequest({
                 method: 'GET',
@@ -720,47 +785,69 @@
                         setTimeout(
                             () =>
                                 resolve(
-                                    fetchWithRetry(currency, url, retries - 1),
+                                    fetchWithRetry(
+                                        currency,
+                                        url,
+                                        productId,
+                                        sku,
+                                        retries - 1,
+                                    ),
                                 ),
                             CONFIG.RETRY_DELAY,
                         );
                         return;
                     }
-                    let priceStr = null,
-                        error = null;
-                    if (r.status >= 200 && r.status < 300) {
-                        const doc = new DOMParser().parseFromString(
-                            r.responseText,
-                            'text/html',
-                        );
-                        priceStr =
-                            doc
-                                .querySelector(CONFIG.SELECTORS.priceText)
-                                ?.textContent.replace(/\+\s*$/, '')
-                                .trim() || null;
-                        if (!priceStr) error = 'Price not found';
-                    } else {
-                        error = `Request failed (${r.status})`;
-                    }
-                    resolve({
+                    const result = {
                         code: currency.code,
-                        priceStr,
-                        error,
-                    });
+                        price: null,
+                        priceStr: null,
+                        currency: null,
+                        error: null,
+                    };
+                    if (r.status >= 200 && r.status < 300) {
+                        const fromState = extractPriceFromState(
+                            r.responseText,
+                            productId,
+                            sku,
+                        );
+                        if (fromState) {
+                            // The state was readable: a missing price means
+                            // the product is not sold in this store.
+                            result.price = fromState.price;
+                            result.currency = fromState.currency;
+                        } else {
+                            result.priceStr = extractPriceFromDom(
+                                r.responseText,
+                            );
+                            if (!result.priceStr)
+                                result.error = 'Price not found';
+                        }
+                    } else {
+                        result.error = `Request failed (${r.status})`;
+                    }
+                    resolve(result);
                 },
                 onerror: () => {
                     if (retries > 0) {
                         setTimeout(
                             () =>
                                 resolve(
-                                    fetchWithRetry(currency, url, retries - 1),
+                                    fetchWithRetry(
+                                        currency,
+                                        url,
+                                        productId,
+                                        sku,
+                                        retries - 1,
+                                    ),
                                 ),
                             CONFIG.RETRY_DELAY,
                         );
                     } else {
                         resolve({
                             code: currency.code,
+                            price: null,
                             priceStr: null,
+                            currency: null,
                             error: 'Network Error',
                         });
                     }
@@ -769,9 +856,9 @@
         });
     }
 
-    function fetchAllPrices(urls, currenciesToFetch) {
+    function fetchAllPrices(urls, currenciesToFetch, productId, sku) {
         const promises = currenciesToFetch.map(c =>
-            fetchWithRetry(c, urls[c.code]),
+            fetchWithRetry(c, urls[c.code], productId, sku),
         );
         return Promise.all(promises);
     }
@@ -919,19 +1006,22 @@
             }
         };
 
+        let closed = false;
+        const finishClose = () => {
+            if (closed) return;
+            closed = true;
+            overlay.remove();
+            document.removeEventListener('keydown', handleKeyDown);
+            lastFocusedElement?.focus();
+        };
         const close = () => {
             overlay.classList.remove('show');
-            overlay.addEventListener(
-                'transitionend',
-                () => {
-                    overlay.remove();
-                    document.removeEventListener('keydown', handleKeyDown);
-                    lastFocusedElement?.focus();
-                },
-                {
-                    once: true,
-                },
-            );
+            overlay.addEventListener('transitionend', finishClose, {
+                once: true,
+            });
+            // transitionend never fires if the transition is skipped
+            // (e.g. reduced motion), so don't leave the overlay stuck.
+            setTimeout(finishClose, 400);
         };
 
         document.addEventListener('keydown', handleKeyDown);
@@ -967,18 +1057,29 @@
     }
 
     // 7) Main Execution Logic
-    async function main(sku) {
-        const anchor = document.querySelector(CONFIG.SELECTORS.insertionPoint);
+    function findInsertionPoint() {
+        // Skip price containers nested in the Buy button or product cards.
+        return (
+            Array.from(
+                document.querySelectorAll(CONFIG.SELECTORS.insertionPoint),
+            ).find(el => !el.closest('button, a')) || null
+        );
+    }
+
+    async function main(product) {
+        const anchor = findInsertionPoint();
         if (!anchor) return;
 
         const {banner, rowsContainer, settingsBtn} = createBanner();
-        banner.dataset.xboxSku = sku;
+        banner.dataset.xboxSku = product.key;
         rowsContainer.innerHTML = `<div class="xbox-row loading">Loading prices...</div>`;
         anchor.parentNode.insertBefore(banner, anchor.nextSibling);
 
         const parts = location.pathname.split('/').filter(p => p);
         const storeIdx = parts.indexOf('store');
-        const [, slug, prod] = parts.slice(storeIdx);
+        const [, slug, urlProd] = parts.slice(storeIdx);
+        const prod = product.pid || urlProd;
+        const sku = product.sku;
         const currenciesToFetch = CURRENCIES.filter(c => Prefs.visible[c.code]);
 
         if (currenciesToFetch.length === 0) {
@@ -995,39 +1096,49 @@
                 `https://www.xbox.com/${c.region}/games/store/${slug}/${prod}/${sku}`,
             ]),
         );
-        const priceResults = await fetchAllPrices(urls, currenciesToFetch);
+        const priceResults = await fetchAllPrices(
+            urls,
+            currenciesToFetch,
+            prod,
+            sku,
+        );
         const rawPrices = Object.fromEntries(
             priceResults.map(r => [
                 r.code,
                 {
                     priceStr: r.priceStr,
+                    currency: r.currency,
                     error: r.error,
                 },
             ]),
         );
         const parsedValues = {};
         currenciesToFetch.forEach(c => {
+            const result = priceResults.find(r => r.code === c.code);
             const raw = rawPrices[c.code];
-            if (raw && raw.priceStr) {
-                try {
-                    let strToParse = raw.priceStr;
-                    if (c.preParse) {
-                        strToParse = c.preParse(strToParse);
-                    }
-                    parsedValues[c.code] = parsePrice(strToParse, c.decimal);
-                } catch (e) {
+            if (result?.price != null) {
+                parsedValues[c.code] = result.price;
+            } else if (raw?.priceStr) {
+                let strToParse = raw.priceStr;
+                if (c.preParse) {
+                    strToParse = c.preParse(strToParse);
+                }
+                const parsed = parsePrice(strToParse, c.decimal);
+                if (Number.isFinite(parsed)) {
+                    parsedValues[c.code] = parsed;
+                } else {
                     raw.error = 'Parse failed';
                 }
             }
         });
 
-        const defaultCurrency = CURRENCIES.find(
-            c => c.code === Prefs.defaultStore,
-        );
+        const defaultCurrency =
+            CURRENCIES.find(c => c.code === Prefs.defaultStore) ||
+            CURRENCIES.find(c => c.code === 'us');
         const rates = await getRates(defaultCurrency.api);
 
-        if (!rates || !defaultCurrency) {
-            rowsContainer.innerHTML = `<div class="xbox-row error">Could not load exchange rates for ${defaultCurrency?.name || 'default store'}.</div>`;
+        if (!rates) {
+            rowsContainer.innerHTML = `<div class="xbox-row error">Could not load exchange rates for ${defaultCurrency.name}.</div>`;
             return;
         }
 
@@ -1046,15 +1157,30 @@
             const linkHtml = `<a href="${urls[c.code]}" target="_blank" rel="noopener noreferrer">${c.name}</a>`;
             const nameWithFlag = `${c.flag} ${linkHtml}`;
 
+            // Trust the currency the store reports; fall back to the default.
+            const currencyCode = (raw.currency || c.api).toLowerCase();
+            const fmtLocal =
+                currencyCode === c.api
+                    ? c.fmt
+                    : x =>
+                          new Intl.NumberFormat(c.region, {
+                              style: 'currency',
+                              currency: currencyCode.toUpperCase(),
+                          }).format(x);
+            const rate = rates[currencyCode];
+
             if (raw.error) {
                 console.warn(`Could not fetch price for ${c.name}:`, raw.error);
                 html = `${nameWithFlag}: <span class="error-text" title="${raw.error}">⚠️ Couldn’t load</span>`;
-            } else if (value != null) {
-                convertedPrice = value / rates[c.api];
+            } else if (value === 0) {
+                convertedPrice = 0;
+                html = `${nameWithFlag}: Free`;
+            } else if (value != null && rate) {
+                convertedPrice = value / rate;
                 html = `${nameWithFlag}: ${defaultCurrency.fmt(convertedPrice)}`;
 
                 if (c.code !== defaultCurrency.code) {
-                    let formattedLocal = c.fmt(value);
+                    let formattedLocal = fmtLocal(value);
                     if (c.isRTL) {
                         formattedLocal = `<span class="rtl-text">${formattedLocal}</span>`;
                     }
@@ -1064,7 +1190,7 @@
                 if (c.tax > 0) {
                     const totalConverted = convertedPrice * (1 + c.tax);
                     const totalLocalValue = value * (1 + c.tax);
-                    let formattedTaxLocal = c.fmt(totalLocalValue);
+                    let formattedTaxLocal = fmtLocal(totalLocalValue);
 
                     if (c.isRTL) {
                         formattedTaxLocal = `<span class="rtl-text">${formattedTaxLocal}</span>`;
@@ -1096,14 +1222,21 @@
         updateBannerDisplay(rowsContainer, displayLines);
     }
 
-    function getCurrentSku() {
+    function getCurrentProduct() {
         try {
             const buyButton = document.querySelector(
                 CONFIG.SELECTORS.buyButton,
             );
             if (!buyButton) return null;
             const mData = JSON.parse(buyButton.dataset.m || '{}');
-            return mData.sku || null;
+            if (!mData.sku) return null;
+            // Almost every product's SKU is "0010", so the product ID is
+            // needed to tell games apart across SPA navigations.
+            return {
+                pid: mData.pid || null,
+                sku: mData.sku,
+                key: `${mData.pid || location.pathname}/${mData.sku}`,
+            };
         } catch (e) {
             return null;
         }
@@ -1114,27 +1247,24 @@
     async function runScript(forceRefresh = false) {
         observer.disconnect();
         try {
-            const currentSku = getCurrentSku();
+            const currentProduct = getCurrentProduct();
             const existingBanner = document.querySelector(
                 CONFIG.SELECTORS.banner,
             );
-            if (!currentSku) {
+            if (!currentProduct) {
                 existingBanner?.remove();
                 return;
             }
             if (
                 !forceRefresh &&
                 existingBanner &&
-                existingBanner.dataset.xboxSku === currentSku
+                existingBanner.dataset.xboxSku === currentProduct.key
             ) {
                 // re-observe even if we don't run
             } else {
                 existingBanner?.remove();
-                const insertionPoint = document.querySelector(
-                    CONFIG.SELECTORS.insertionPoint,
-                );
-                if (insertionPoint) {
-                    await main(currentSku);
+                if (findInsertionPoint()) {
+                    await main(currentProduct);
                 }
             }
         } catch (error) {
