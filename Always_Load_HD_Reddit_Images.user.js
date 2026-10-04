@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Always Load HD Reddit Images
 // @namespace    https://github.com/sinazadeh/userscripts
-// @version      1.1.2
+// @version      1.1.3
 // @description  Automatically replaces blurry Reddit image previews with their full-resolution originals as you scroll. Includes a menu command to toggle the feature on or off.
 // @author       TheSina
 // @match        https://*.reddit.com/*
@@ -44,6 +44,10 @@
             current.includes('external-preview')
         )
             return;
+
+        // Skip the blurred backdrop behind post media: it is shown at low
+        // opacity, so fetching the multi-MB original for it is wasted.
+        if (img.classList.contains('post-background-image-filter')) return;
 
         // Process only if the src is a standard preview
         if (!src.includes('preview.redd.it')) return;
@@ -120,21 +124,25 @@
         elementsToObserve.forEach(el => io.observe(el));
     }
 
+    // Collect added nodes across calls: the debounce only keeps the latest
+    // callback, so records from earlier batches must not be dropped.
     let mutationTimeout;
+    const pendingElements = new Set();
     const handleMutations = records => {
-        clearTimeout(mutationTimeout);
-        mutationTimeout = setTimeout(() => {
-            const addedElements = [];
-
-            for (const rec of records) {
-                for (const node of rec.addedNodes) {
-                    if (node instanceof HTMLElement) {
-                        addedElements.push(node);
-                    }
+        for (const rec of records) {
+            for (const node of rec.addedNodes) {
+                if (node instanceof HTMLElement) {
+                    pendingElements.add(node);
                 }
             }
-
-            addedElements.forEach(observeNewElements);
+        }
+        clearTimeout(mutationTimeout);
+        mutationTimeout = setTimeout(() => {
+            const addedElements = Array.from(pendingElements);
+            pendingElements.clear();
+            addedElements
+                .filter(el => el.isConnected)
+                .forEach(observeNewElements);
         }, 50);
     };
 
