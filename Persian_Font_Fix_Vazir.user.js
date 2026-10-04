@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Persian Font Fix (Vazir)
 // @namespace    https://github.com/sinazadeh/userscripts
-// @version      2.2.4
+// @version      2.2.5
 // @description  Improves the readability of Persian and RTL content by applying the Vazir font across supported websites.
 // @author       TheSina
 // @match       *://*.telegram.org/*
@@ -71,22 +71,11 @@
         };
     }
 
-    // --- Throttle Utility ---
-    function throttle(func, limit) {
-        let inThrottle;
-        return function () {
-            const args = arguments;
-            const context = this;
-            if (!inThrottle) {
-                func.apply(context, args);
-                inThrottle = true;
-                setTimeout(() => (inThrottle = false), limit);
-            }
-        };
-    }
-
     // --- Character Fix ---
     const replacementRegex = /[يك]/g;
+    // Non-global twin for .test(): a /g regex keeps lastIndex between calls,
+    // which made every other test() on a matching string return false.
+    const needsFixRegex = /[يك]/;
     const charMap = new Map([
         ['ي', 'ی'],
         ['ك', 'ک'],
@@ -95,18 +84,16 @@
     const fixText = text =>
         text.replace(replacementRegex, c => charMap.get(c) || c);
 
-    const processed = new WeakSet();
     const walkerFilter = {
         acceptNode(node) {
-            return replacementRegex.test(node.nodeValue)
+            return needsFixRegex.test(node.nodeValue)
                 ? NodeFilter.FILTER_ACCEPT
                 : NodeFilter.FILTER_SKIP;
         },
     };
 
     function fixNode(root) {
-        if (processed.has(root) || !replacementRegex.test(root.textContent))
-            return;
+        if (!needsFixRegex.test(root.textContent)) return;
 
         const walker = document.createTreeWalker(
             root,
@@ -115,25 +102,16 @@
             false,
         );
 
-        let node,
-            changed = false;
+        let node;
         while ((node = walker.nextNode())) {
             const orig = node.nodeValue;
             const upd = fixText(orig);
-            if (orig !== upd) {
-                node.nodeValue = upd;
-                changed = true;
-            }
+            if (orig !== upd) node.nodeValue = upd;
         }
-
-        if (changed) processed.add(root);
     }
 
     // --- Auto-tag Persian text blocks ---
-    const tagged = new WeakSet(); // Optimization: Avoid re-tagging
     function tagPersianText(root) {
-        if (tagged.has(root)) return; // Optimization
-
         const regex = /[\u0600-\u06FF]/;
         const walker = document.createTreeWalker(
             root,
@@ -149,11 +127,18 @@
                 parent.dataset.fontFix = 'fa';
             }
         }
-        tagged.add(root); // Mark as tagged
     }
 
     // --- Throttled Processor for Mutations ---
-    const processMutations = throttle(nodes => {
+    const THROTTLE_MS = 250;
+    const nodesToProcess = new Set();
+    let lastProcessed = 0;
+    let processTimer = null;
+
+    function processMutations() {
+        lastProcessed = Date.now();
+        const nodes = Array.from(nodesToProcess);
+        nodesToProcess.clear();
         for (const node of nodes) {
             // For element nodes, check content and find inputs
             if (node.nodeType === 1) {
@@ -174,10 +159,23 @@
                 }
             }
         }
-        nodes.clear(); // Clear the set for the next batch
-    }, 250); // Process mutations at most every 250ms
+    }
 
-    const nodesToProcess = new Set();
+    // Run at most every THROTTLE_MS, but always run the trailing batch so
+    // nodes added during the quiet period are not left unprocessed.
+    function scheduleProcessing() {
+        if (processTimer) return;
+        const wait = lastProcessed + THROTTLE_MS - Date.now();
+        if (wait <= 0) {
+            processMutations();
+            return;
+        }
+        processTimer = setTimeout(() => {
+            processTimer = null;
+            processMutations();
+        }, wait);
+    }
+
     const obs = new MutationObserver(muts => {
         for (const m of muts) {
             if (m.type === 'childList') {
@@ -187,7 +185,7 @@
             }
         }
         if (nodesToProcess.size > 0) {
-            processMutations(nodesToProcess);
+            scheduleProcessing();
         }
     });
 
@@ -197,7 +195,7 @@
         el.dataset.pfixAttached = '1';
 
         const doFix = () => {
-            if (!replacementRegex.test(el.value)) return;
+            if (!needsFixRegex.test(el.value)) return;
             const orig = el.value;
             const upd = fixText(orig);
             if (orig === upd) return;
@@ -240,11 +238,12 @@
 
     // --- Force Reflow/Repaint ---
     function forceRepaint() {
-        document.querySelectorAll('[data-font-fix="fa"]').forEach(el => {
-            el.classList.add('font-fix-repaint');
-            void el.offsetHeight; // Force repaint
-            el.classList.remove('font-fix-repaint');
-        });
+        // Toggle in one batch so there is a single forced layout instead of
+        // one per tagged element.
+        const els = document.querySelectorAll('[data-font-fix="fa"]');
+        els.forEach(el => el.classList.add('font-fix-repaint'));
+        void document.body.offsetHeight; // Force repaint
+        els.forEach(el => el.classList.remove('font-fix-repaint'));
     }
 
     // --- Viewport Change Handling ---
