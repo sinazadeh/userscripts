@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Google Search: Stremio Links
 // @namespace    https://github.com/sinazadeh/userscripts
-// @version      2.0.0
+// @version      2.0.1
 // @description  Adds "Open in Stremio" buttons to Google search results and knowledge panels for IMDb titles.
 // @author       TheSina
 // @match        *://www.google.*/*

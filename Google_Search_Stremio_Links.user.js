@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Google Search: Stremio Links
 // @namespace    https://github.com/sinazadeh/userscripts
-// @version      2.0.0
+// @version      2.0.1
 // @description  Adds "Open in Stremio" buttons to Google search results and knowledge panels for IMDb titles.
 // @author       TheSina
 // @match        *://www.google.*/*
@@ -51,25 +51,31 @@
             return;
         }
 
+        // Match the ID explicitly: IMDb links often carry a trailing
+        // "?ref_=..." segment, so the last path part is not the ID.
+        const imdbIdFrom = link => link?.href.match(/title\/(tt\d+)/)?.[1];
+
         if (reviewContainer != null) {
-            let imdbEle = reviewContainer.querySelector(
-                "a[href*='https://www.imdb.com/']",
+            imdbCode = imdbIdFrom(
+                reviewContainer.querySelector(
+                    "a[href*='https://www.imdb.com/']",
+                ),
             );
-
-            if (imdbEle) {
-                let imdbParts = imdbEle.href.split('/');
-                imdbCode = imdbParts.pop() || imdbParts.pop();
-            }
         }
 
-        if (imdbCode === null) {
-            let imdbLink = document.querySelector(
-                "a[href*='https://www.imdb.com/']",
-            )?.href;
-            imdbCode = imdbLink?.match(/title\/(tt\d+)/)?.[1];
+        if (!imdbCode) {
+            imdbCode = imdbIdFrom(
+                document.querySelector(
+                    "a[href*='https://www.imdb.com/title/']",
+                ),
+            );
         }
 
-        if (imdbCode === null) {
+        if (!imdbCode) {
+            return;
+        }
+
+        if (!watchOption.firstElementChild?.firstElementChild) {
             return;
         }
 
