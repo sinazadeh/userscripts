@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GitHub Tab Avatar
 // @namespace    https://github.com/sinazadeh/userscripts
-// @version      1.0.2
+// @version      1.0.3
 // @description  Use each GitHub repository’s avatar as the browser tab icon.
 // @author       TheSina
 // @match        *://github.com/*/*
@@ -20,7 +20,7 @@
     const LOG = (...args) => DEBUG && console.log('[GTU]', ...args);
 
     let iconEls = [];
-    let originalIcon = null;
+    let appliedIcon = null;
     let lastOwner = null;
     // load cache from localStorage
     let iconCache = new Map();
@@ -43,8 +43,8 @@
 
         const [segment1, segment2] = pathSegments;
 
-        // If the first segment is 'orgs', the owner is the second segment
-        if (segment1 === 'orgs') {
+        // /orgs/<org>/..., /users/<user>/projects/..., /sponsors/<user>
+        if (['orgs', 'users', 'sponsors'].includes(segment1)) {
             return segment2;
         }
 
@@ -58,6 +58,27 @@
             'explore',
             'organizations',
             'account',
+            'topics',
+            'collections',
+            'trending',
+            'search',
+            'codespaces',
+            'features',
+            'enterprise',
+            'apps',
+            'login',
+            'new',
+            'security',
+            'solutions',
+            'resources',
+            'site',
+            'about',
+            'pricing',
+            'readme',
+            'customer-stories',
+            'stars',
+            'watching',
+            'dashboard',
         ]);
         if (nonTargetSegments.has(segment1)) {
             return null;
@@ -68,56 +89,69 @@
     }
 
     function setFavicon(url) {
-        if (!iconEls.length || !document.contains(iconEls[0])) {
-            initFaviconTags();
-        }
+        initFaviconTags();
+        appliedIcon = new URL(url, location.href).href;
         iconEls.forEach(el => {
-            if (el && document.contains(el)) {
-                el.href = url;
-            }
+            // GitHub declares type="image/svg+xml"; avatars are PNG/JPEG.
+            el.removeAttribute('type');
+            el.href = url;
         });
     }
 
     function resetFavicon() {
-        if (originalIcon) setFavicon(originalIcon);
+        appliedIcon = null;
+        iconEls.forEach(el => {
+            if (!el.isConnected || !('gtaOrigHref' in el.dataset)) return;
+            el.href =
+                el.dataset.gtaOrigHref || 'https://github.com/favicon.ico';
+            if (el.dataset.gtaOrigType) {
+                el.setAttribute('type', el.dataset.gtaOrigType);
+            }
+        });
     }
 
     function initFaviconTags() {
-        if (!iconEls.length || !document.contains(iconEls[0])) {
-            iconEls = Array.from(
-                document.querySelectorAll('link[rel*="icon"]'),
-            );
-            if (!iconEls.length) {
-                const link = document.createElement('link');
-                link.rel = 'shortcut icon';
-                document.head.appendChild(link);
-                iconEls = [link];
-            }
-            if (!originalIcon && iconEls[0]) {
-                originalIcon =
-                    iconEls[0].href || 'https://github.com/favicon.ico';
-            }
+        if (iconEls.length && iconEls.every(el => el.isConnected)) return;
+        // rel~="icon" matches "icon" and "alternate icon" but not GitHub's
+        // "fluid-icon"/"mask-icon" links.
+        iconEls = Array.from(document.querySelectorAll('link[rel~="icon"]'));
+        if (!iconEls.length) {
+            const link = document.createElement('link');
+            link.rel = 'icon';
+            document.head.appendChild(link);
+            iconEls = [link];
         }
+        iconEls.forEach(el => {
+            if (!('gtaOrigHref' in el.dataset)) {
+                el.dataset.gtaOrigHref = el.getAttribute('href') || '';
+                el.dataset.gtaOrigType = el.getAttribute('type') || '';
+            }
+        });
     }
 
-    // try DOM first (new method)
     async function getAvatarFromAPI(owner) {
+        // github.com/<owner>.png redirects to the avatar and is not subject
+        // to the 60 requests/hour limit of the unauthenticated API.
+        const fallback = `https://github.com/${owner}.png?size=32`;
         try {
             LOG('🚀 Using GitHub API to find avatar for:', owner);
             const res = await fetch(`https://api.github.com/users/${owner}`, {
                 headers: {Accept: 'application/vnd.github.v3+json'},
             });
-            if (!res.ok) throw new Error('API response not OK');
+            // 404: not a user or organization (e.g. a reserved route).
+            if (res.status === 404) return null;
+            if (!res.ok) throw new Error(`API response ${res.status}`);
             const data = await res.json();
             if (data?.avatar_url) {
                 const urlObj = new URL(data.avatar_url);
                 urlObj.searchParams.set('s', '32');
                 return urlObj.href;
             }
+            return null;
         } catch (err) {
-            LOG('⚠️ API lookup failed:', err);
+            LOG('⚠️ API lookup failed, using fallback:', err);
+            return fallback;
         }
-        return null;
     }
 
     async function updateFavicon() {
@@ -125,22 +159,22 @@
         isUpdating = true;
         try {
             const owner = getOwnerName();
+            lastOwner = owner;
             if (!owner) {
                 resetFavicon();
-                lastOwner = null;
                 return;
             }
-            // cached?
-            if (owner === lastOwner && iconCache.has(owner)) {
-                const cached = iconCache.get(owner);
-                if (Date.now() - cached.ts < CACHE_TTL) {
-                    setFavicon(cached.url);
-                    return;
-                }
+            // cached? (checked on every navigation, not only for the same
+            // owner, so browsing a repo doesn't hit the rate-limited API)
+            const cached = iconCache.get(owner);
+            if (cached && Date.now() - cached.ts < CACHE_TTL) {
+                setFavicon(cached.url);
+                return;
             }
-            lastOwner = owner;
 
             const avatarUrl = await getAvatarFromAPI(owner);
+            // Navigated elsewhere while waiting; the poll will catch up.
+            if (getOwnerName() !== owner) return;
             if (avatarUrl) {
                 iconCache.set(owner, {url: avatarUrl, ts: Date.now()});
                 try {
@@ -172,7 +206,6 @@
 
     function handleNavigation() {
         LOG('🧭 Navigation detected');
-        lastOwner = null; // Invalidate cache on navigation
         debouncedUpdate();
     }
 
@@ -202,9 +235,19 @@
 
         setInterval(() => {
             const currentOwner = getOwnerName();
-            if (currentOwner && currentOwner !== lastOwner) {
+            if (currentOwner !== lastOwner) {
                 LOG('🔄 Polling detected change');
                 handleNavigation();
+                return;
+            }
+            // GitHub swaps the favicon itself (Turbo head merges, CI status
+            // icons on pull requests), so put the avatar back if needed.
+            if (
+                appliedIcon &&
+                !isUpdating &&
+                iconEls.some(el => !el.isConnected || el.href !== appliedIcon)
+            ) {
+                setFavicon(appliedIcon);
             }
         }, 1000);
     }
