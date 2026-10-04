@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Open All Thread Pages
 // @namespace    https://github.com/sinazadeh/userscripts
-// @version      1.0.2
+// @version      1.0.3
 // @description  Adds a convenient "Open All" button to forum threads, allowing you to load every page into a new tab with a single click.
 // @author       TheSina
 // @match        *://*.*/threads/*
@@ -101,7 +101,12 @@
         nav.appendChild(btn);
     }
 
-    document.addEventListener('DOMContentLoaded', addButton);
+    // Userscripts usually run after DOMContentLoaded has already fired.
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', addButton);
+    } else {
+        addButton();
+    }
     new MutationObserver(addButton).observe(document.body, {
         childList: true,
         subtree: true,
